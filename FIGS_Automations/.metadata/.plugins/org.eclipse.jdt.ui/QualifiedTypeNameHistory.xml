@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="java.time.Duration"/>
+    <fullyQualifiedTypeName name="com.figs.automation.flows.MoneyTransfer"/>
+    <fullyQualifiedTypeName name="com.figs.automation.flows.SSS"/>
+    <fullyQualifiedTypeName name="io.github.bonigarcia.wdm.WebDriverManager"/>
+    <fullyQualifiedTypeName name="org.openqa.selenium.chrome.ChromeOptions"/>
+    <fullyQualifiedTypeName name="org.openqa.selenium.interactions.Actions"/>
+    <fullyQualifiedTypeName name="java.awt.AWTException"/>
+    <fullyQualifiedTypeName name="java.awt.Robot"/>
+    <fullyQualifiedTypeName name="java.awt.event.KeyEvent"/>
+    <fullyQualifiedTypeName name="com.figs.automation.flows.AccountOpening"/>
+    <fullyQualifiedTypeName name="org.openqa.selenium.support.ui.ExpectedConditions"/>
+    <fullyQualifiedTypeName name="org.openqa.selenium.support.ui.WebDriverWait"/>
+    <fullyQualifiedTypeName name="java.util.concurrent.TimeUnit"/>
+    <fullyQualifiedTypeName name="org.openqa.selenium.By"/>
+    <fullyQualifiedTypeName name="java.lang.Thread"/>
+    <fullyQualifiedTypeName name="java.util.Arrays"/>
+    <fullyQualifiedTypeName name="com.figs.automation.flows.Remittance"/>
+    <fullyQualifiedTypeName name="org.openqa.selenium.support.ui.ExpectedCondition"/>
+    <fullyQualifiedTypeName name="org.openqa.selenium.By.ByXPath"/>
+    <fullyQualifiedTypeName name="com.figs.automation.flows.PassbookServices"/>
+</qualifiedTypeNameHistroy>

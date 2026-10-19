@@ -1,0 +1,341 @@
+package com.figs.automation.runners;
+
+import com.figs.automation.flows.LoanDeposit;
+import com.figs.automation.flows.MiniStatement;
+import com.figs.automation.flows.MoneyTransfer;
+import com.figs.automation.flows.PassbookServices;
+import com.figs.automation.flows.Remittance;
+import com.figs.automation.flows.SSS;
+import com.figs.automation.flows.Aadhaar_Seeding_SubKO;
+import com.figs.automation.flows.AccountOpening;
+import com.figs.automation.flows.BalanceEnquiry;
+import com.figs.automation.flows.CashDeposit;
+import com.figs.automation.flows.CashWithdrawal;
+import com.figs.automation.flows.FundTransfer;
+import com.figs.automation.flows.KYCRelatedServices;
+import com.figs.automation.flows.EaseServices;
+
+import org.openqa.selenium.WebDriver;
+import org.testng.annotations.Test;
+
+import javax.swing.*;
+
+
+public class FunctionalitySelector {
+
+    private final WebDriver driver;
+
+    public FunctionalitySelector(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void selectAndRun() {
+        String[] options = { "All","Loan Deposit","ViewLoanDataCollection","Cash Deposit","Cash Withdrawal","Fund Transfer","Balance Enquiry","Mini Statement","MoneyTransfer","MapBarcodePassbook","SSS_PMJJBY","SSS_PMSBY","SSS_APY","Aadhaar_Seeding_SubKO","AadharSeeding-DeSeeding","ATM Card Block","ChequeBookRequest","StopPaymentofCheque","Account Opening","RDSTDR",
+        		"Deposit to PPF SSA","ATM Card Issuance-ReIssuance","Lead Creation","KYC Updation","KYC Enquiry","Add Beneficiary","Delete Beneficiary","IMPS","NEFT","RDRemittance","BBPS", "Exit"};
+        String functionality = (String) JOptionPane.showInputDialog(
+                null,
+                "Select functionality to run:",
+                "Functionality Selector",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (functionality == null) {
+            functionality = "All";
+        }
+
+        switch (functionality) {
+            case "Loan Deposit":
+                new LoanDeposit(driver).run_LoanToDeposit();
+                break;
+            case "ViewLoanDataCollection":
+                new LoanDeposit(driver).run_ViewLoanDataCollection();
+                break; 
+            case "Cash Deposit":
+                new CashDeposit(driver).run();
+                break;
+            case "Cash Withdrawal":
+              new CashWithdrawal(driver).run();
+                break;
+            case "Fund Transfer":
+              new FundTransfer(driver).run();
+                   break;
+            case "Balance Enquiry":
+              new BalanceEnquiry(driver).run();
+                   break;
+            case "Mini Statement":
+              new MiniStatement(driver).run();
+                break;
+            case "MoneyTransfer":
+                new MoneyTransfer(driver).run();
+                break;
+            case "MapBarcodePassbook":
+                new PassbookServices(driver).run_MapBarcodePassbook();
+                break;
+                
+            case "Account Opening":
+                new AccountOpening(driver).run();
+                break;
+            case "RDSTDR":
+                new AccountOpening(driver).Run_STDR();
+                break;
+            case "SSS_PMJJBY":
+                new SSS(driver).Run_PMJJBY();
+                break;
+            case "SSS_PMSBY":
+                new SSS(driver).Run_PMSBY();
+                break;
+            case "SSS_APY":
+                new SSS(driver).Run_APY();
+                break;
+            case "AadharSeeding-DeSeeding":
+                new EaseServices(driver).run_AadharSeedingDeSeeding();
+                break;
+            case "ATM Card Issuance-ReIssuance":
+                new EaseServices(driver).run_ATMCardIssuanceReIssuance();
+                break;
+            case "ATM Card Block":
+                new EaseServices(driver).run_ATMCardBlock();
+                break;
+            case "ChequeBookRequest":
+                new EaseServices(driver).run_ChequeBookRequest();
+                break;
+            case "StopPaymentofCheque":
+                new EaseServices(driver).run_StopPaymentofCheque();
+                break;
+            case "Lead Creation":
+                new EaseServices(driver).run_LeadCreation();
+                break;
+            case "KYC Updation":
+                new KYCRelatedServices(driver).run_KYCUpdation();
+                break;
+            case "KYC Enquiry":
+                new KYCRelatedServices(driver).run_KYCEnquiry();
+                break;
+            case "Aadhaar_Seeding_SubKO":
+                new Aadhaar_Seeding_SubKO(driver).run();
+                break; 
+            case "IMPS":
+                new Remittance(driver).run_IMPS();
+                break;
+            case "NEFT":
+                new Remittance(driver).run_NEFT(); 
+                break;
+            case "Deposit to PPF SSA":
+                new Remittance(driver).run_DeposittoPPFSSA();
+                break; 
+            case "Add Beneficiary":
+                new Remittance(driver).run_AddBeneficiary();
+                break;
+            case "Delete Beneficiary":
+                new Remittance(driver).run_DeleteBeneficiary();
+                break;
+            case "RDRemittance":
+                new Remittance(driver).run_RDRemittance();
+                break;
+            case "BBPS":
+                new Remittance(driver).run_BBPS();
+                break;
+                
+            case "All":
+                runAll();
+                break;
+
+            case "Exit":
+                System.out.println("Exit selected. Skipping functionality.");
+                break;
+
+            default:
+                System.out.println(" Functionality not implemented: " + functionality);
+        }
+    }
+
+    private void runAll() {
+        System.out.println(" Running all flows sequentially...");
+
+        
+        
+        try {
+			new PassbookServices(driver).run_MapBarcodePassbook();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new LoanDeposit(driver).run_LoanToDeposit();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new LoanDeposit(driver).run_ViewLoanDataCollection();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new CashDeposit(driver).run();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new CashWithdrawal(driver).run();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new FundTransfer(driver).run();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			 new BalanceEnquiry(driver).run();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+           
+		try {
+			new MiniStatement(driver).run();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+           
+		try {
+			new MoneyTransfer(driver).run();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new AccountOpening(driver).run();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new SSS(driver).Run_PMJJBY();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new SSS(driver).Run_PMSBY();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new SSS(driver).Run_APY();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new EaseServices(driver).run_ATMCardBlock();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new EaseServices(driver).run_ChequeBookRequest();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+        
+		try {
+			new EaseServices(driver).run_StopPaymentofCheque();
+		} catch (Exception e) {
+			// TODO: handle exception
+		} 
+        
+        try {
+        	new EaseServices(driver).run_LeadCreation();
+		} catch (Exception e) {
+			// TODO: handle exception
+		} 
+        
+		try {
+			new Aadhaar_Seeding_SubKO(driver).run();
+		} catch (Exception e) {
+			// TODO: handle exception
+		} 
+		
+		try {
+        new EaseServices(driver).run_AadharSeedingDeSeeding();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		try {
+	        new EaseServices(driver).run_ATMCardIssuanceReIssuance();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		try {
+			new KYCRelatedServices(driver).run_KYCUpdation();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		
+		try {
+			new KYCRelatedServices(driver).run_KYCEnquiry();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		
+		try {
+			new Remittance(driver).run_IMPS();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		
+		try {
+			new Remittance(driver).run_NEFT();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		
+		try {
+			new Remittance(driver).run_DeposittoPPFSSA();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		
+		try {
+			new Remittance(driver).run_AddBeneficiary();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		
+		try {
+			new Remittance(driver).run_DeleteBeneficiary();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		
+		try {
+			new Remittance(driver).run_RDRemittance();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		
+		try {
+			new Remittance(driver).run_BBPS();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+      
+//		try {
+//			 new AdharLinkDelink(driver).run();
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//		}
+    
+        
+        System.out.println(" All flows executed.");
+    }
+}

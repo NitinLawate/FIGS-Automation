@@ -1,0 +1,3286 @@
+package com.figs.automation.runners;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Calendar;
+import java.util.List;
+
+public class Validation {
+
+    private final WebDriver driver;
+
+    // data for this row
+    private List<String> arl;
+    private final String[] Arr2 = new String[2]; // [0]=status, [1]=message
+    private String txt = "";                     // hold UI text value
+    private String txt1 = ""; 
+    private String txt2 = ""; 
+    private String txt3 = ""; 
+    
+    
+    public Validation(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void AcctServiceValidations(List<String> rowData) throws InterruptedException {
+        this.arl = rowData;
+        String txnType = arl.get(1);
+        if ("Onus_Deposit_AEPS".equalsIgnoreCase(txnType) || "Deposit_Account".equalsIgnoreCase(txnType))
+        {
+        	TransactionsChkResult(); 	
+       }else if("Onus_Withdrawal_AEPS".equalsIgnoreCase(txnType) || "Withdrawal_Account".equalsIgnoreCase(txnType))
+       {
+    	   TransactionsChkResult();
+       }else if("Onus_FundTransfer_AEPS".equalsIgnoreCase(txnType) || "FundTransfer_Account".equalsIgnoreCase(txnType))
+       {
+    	   TransactionsChkResult();
+       }else if("Onus_Mini_Statement_AEPS".equalsIgnoreCase(txnType) || "Mini_Statement_Account".equalsIgnoreCase(txnType))
+       {
+    	   TransactionsChkResult();
+       }else if("Onus_Balance_Enquiry_AEPS".equalsIgnoreCase(txnType) || "Balance_Enquiry_Account".equalsIgnoreCase(txnType))
+       {
+    	   TransactionsChkResult();
+       }else if("AadhaarSeeding".equalsIgnoreCase(txnType))
+       {
+    	   AdhaarSeedingDeseedingChkResult();
+       }
+        
+        
+    }
+    
+    public void AccountOpeningValidations(List<String> rowData) throws InterruptedException {
+        this.arl = rowData;
+        String txnType = arl.get(1);
+        if ("Account Opening".equalsIgnoreCase(txnType))
+        {
+        	AccountOpeningChkResult();
+       }
+    }
+    
+    public void AcuqisitonServiceValidations(List<String> rowData) throws InterruptedException {
+        this.arl = rowData;
+
+        String txnType = arl.get(1);
+
+         if ("MoneyTransfer_CIF".equalsIgnoreCase(txnType) || "MoneyTransfer_ACC".equalsIgnoreCase(txnType) || "DepositToLoanAccount".equalsIgnoreCase(txnType) || "View Loan Data Collection".equalsIgnoreCase(txnType)  ) {
+        	 MoneyTransferandLoanDepositChkResult();
+        } else if("PMJJBY".equalsIgnoreCase(txnType) || "PMSBY".equalsIgnoreCase(txnType) || "APY".equalsIgnoreCase(txnType))
+        {
+        	SSSChkResult();
+        }
+        else if("ATMCardBlock_ACC".equalsIgnoreCase(txnType) || "ATMCardBlock_Card".equalsIgnoreCase(txnType) || "Stop Payment of Cheque".equalsIgnoreCase(txnType) || "Cheque Book Payment".equalsIgnoreCase(txnType) )
+        {
+        	EaseBankingChkResult();
+        }
+        else if("AadhaarSeeding_SubKO".equalsIgnoreCase(txnType))
+        {
+        	
+        }
+         else  {
+            System.out.println("No matching validation flow found for type: " + txnType);
+        }
+    }
+
+
+    // Transactions check result
+    private void TransactionsChkResult() throws InterruptedException {
+        TransactionsMessageReader();
+        String timestamp = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a")
+                .format(Calendar.getInstance().getTime());
+
+        if (arl.size() > 7 && arl.get(7).equals(Arr2[0])) {
+            Arr2[0] = "Pass : " + timestamp;
+        } else {
+            Arr2[0] = "Fail : " + timestamp;
+        }
+
+        System.out.println("Status is: " + Arr2[0]);
+        System.out.println("Actual Result is: " + Arr2[1]);
+        Result.setResult(Arr2[0],Arr2[1]);
+    }
+
+    
+   
+    //  Transactions Validation
+    private void TransactionsMessageReader() {
+        try {
+            if ("AEPS".equals(arl.get(6)) && ValidateAEPSTransactionsPage()) {
+                Arr2[1] = "User is navigated to " + txt + " page.";
+                Arr2[0] = "Pass";
+            }else if(arl.get(5).equals("ValidData") && ValidateDATATransactionsPage(arl.get(4))){
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}else if ("Account".equals(arl.get(6)) && ValidateAccountTransactionsPage()) {
+                Arr2[1] = "User is navigated to " + txt + " page.";
+                Arr2[0] = "Pass";
+            } else if ("PROCEED_DISABLED".equals(arl.get(6)) && ValidatePROCEEDTransactionsPage()) {
+                Arr2[1] = "Proceed button is disabled.";
+                Arr2[0] = "Pass";
+            } else if ("PROCEED_ENABLED".equals(arl.get(6)) && ValidatePROCEEDButtonIsEnabled()) {
+                Arr2[1] = "Proceed button is enabled and clickable.";
+                Arr2[0] = "Pass";
+            } else if ("PROCEED_CONFIRM".equals(arl.get(6)) && ValidatePROCEED_CONFIRMButtonIsEnabled()) {
+                Arr2[1] = "Proceed button is enabled and clickable.";
+                Arr2[0] = "Pass";
+            } else if ("PROCEED_PopUp".equals(arl.get(6)) && ValidatePROCEEDButtonPopUp()) {
+                Arr2[1] = "Proceed button is enabled and clickable.";
+                Arr2[0] = "Pass";
+            } else if ("PROCEED_FIG".equals(arl.get(6)) && ValidatePROCEEDButtonFig()) {
+                Arr2[1] = "Proceed button is enabled and clickable. user is able to do fingerprint auth";
+                Arr2[0] = "Pass";
+            } else if ("YES, I DO".equals(arl.get(6)) && ClickYesIDoButton()) {
+                Arr2[1] = "'YES, I DO' button is enabled and clicked.";
+                Arr2[0] = "Pass";
+            } else if ("visually impaired".equals(arl.get(6)) && ClickCheckBox()) {
+                Arr2[1] = "Customer is visually impaired checkBox button is enabled and clicked.";
+                Arr2[0] = "Pass";
+            } else if ("Finger".equals(arl.get(6)) && FingerPrint()) {
+                Arr2[1] = "Customer FingerPrint Authentication Done and Proceed Button is Clickable";
+                Arr2[0] = "Pass";
+            } else if ("CusmFinger".equals(arl.get(6)) && CusmFingerPrint()) {
+                Arr2[1] = "Customer FingerPrint Authentication Done and Proceed Button is Clickable";
+                Arr2[0] = "Pass";
+            } else if ("Pop-Up".equals(arl.get(6)) && isTransactionSuccessful()) {
+                Arr2[1] = "Transaction successful and Got Success message Pop-Up";
+                Arr2[0] = "Pass";
+            } else if ("BankName".equals(arl.get(6)) && ValidateSBIBANKTransactionsPage()) {
+                Arr2[1] = "Valid Data is Entered '" + txt + "'.";
+                Arr2[0] = "Pass";
+            } else if(arl.get(6).equals("AadhaarNumber") || arl.get(6).equals("VID") && ValidateAADHAARNOTransactionsPage())
+			{
+				Arr2[1] = "Valid Data is Entered 'AadhaarNumber'.";
+				Arr2[0] = "Pass";
+			}else if(arl.get(6).equals("Beneficiary Aadhaar Number") && ValidateSecondAADHAARNOTransactionsPage())
+			{
+				Arr2[1] = "Valid Data is Entered 'AadhaarNumber'.";
+				Arr2[0] = "Pass";
+			}else if(arl.get(6).equals("Witness Aadhaar Number") && ValidateThirdAADHAARNOTransactionsPage())
+			{
+				Arr2[1] = "Valid Data is Entered 'AadhaarNumber'.";
+				Arr2[0] = "Pass";
+			}else {
+                Arr2[0] = "Fail";
+                Arr2[1] = "Test Case Failed";
+            }
+        } catch (Exception e) {
+            System.out.println("Exception Message: " + e.getMessage());
+            try {
+                Arr2[0] = "Fail";
+                Arr2[1] = driver.findElement(By.xpath("//div[@class='userinfo']/font")).getText();
+            } catch (Exception ex) {
+                Arr2[0] = "Fail";
+                Arr2[1] = (Arr2[1] == null ? "" : Arr2[1]) +
+                        " /n Error caused due to unexpected flow or negative testcase. Check Screenshot.";
+            }
+        }
+    }
+    
+ // AEPS Transactions check result
+    private void AdhaarSeedingDeseedingChkResult() throws InterruptedException {
+    	AdhaarSeedingDeseedingMessageReader();
+        String timestamp = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a")
+                .format(Calendar.getInstance().getTime());
+
+        if (arl.size() > 7 && arl.get(7).equals(Arr2[0])) {
+            Arr2[0] = "Pass : " + timestamp;
+        } else {
+            Arr2[0] = "Fail : " + timestamp;
+        }
+
+        System.out.println("Status is: " + Arr2[0]);
+        System.out.println("Actual Result is: " + Arr2[1]);
+        Result.setResult(Arr2[0],Arr2[1]);
+    }
+
+    
+   
+    // AEPS Transactions Validation
+    private void AdhaarSeedingDeseedingMessageReader() {
+        try {
+        	if ( arl.get(6).equals("Agent Aadhaar Seeding") && isClickedAgentAdhaarSeeding() )
+			{
+				 Arr2[1] = "Selected User Service is = " + txt;
+				 Arr2[0]="Pass";
+			}
+			 else if( arl.get(6).equals("AadhaarSeeding") && isClickedAdhaarSeeding() )
+			{
+				Arr2[1] = "Selected User Service is = " + txt;
+				Arr2[0]="Pass";
+			}
+			 else if( arl.get(6).equals("AadhaarSeeding") && isClickedAdhaarDeSeeding() )
+			{
+				Arr2[1] = "Selected User Service is = " + txt;
+				Arr2[0]="Pass";
+			}
+			else if (arl.get(6).equals("EnterAdhaarNumber") && isClickedAdhaarNumber())
+			{
+				Arr2[1] = "User Entered Adhar Number = " + txt;
+				Arr2[0]="Pass";	
+			}
+			else if (arl.get(6).equals("Enter Account Number") && isClickedAccountNumber())
+			{
+				Arr2[1] = "User Entered Account Number = " + txt;
+				Arr2[0]="Pass";	
+			}
+			else if (arl.get(6).equals("ClickSubmit"))
+			{
+				Arr2[1] = "Proceed button is enable and clicked";
+				Arr2[0]="Pass";	
+			}
+			else if (arl.get(6).equals("SuccessfulAuthorize"))
+			{
+				Arr2[1] = "Proceed button is Succesful Authorize";
+				Arr2[0]="Pass";	
+			}
+			else if (arl.get(6).equals("ClickProceed"))
+			{
+				Arr2[1] = "Proceed PopUP button is enable and clicked";
+				Arr2[0]="Pass";	
+			}
+			else if(arl.get(6).equals("YES, I DO") && ClickYesIDoButton())
+			{
+				Arr2[1] = "'YES, I DO' button is enabled and clicked.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(6).equals("Finger") && FingerPrint())   
+			{
+				Arr2[1] = "Customer FingerPrint Authentication Done and Proceed Button is Clickable";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(6).equals("TransactionStatus") && waitForTransactionReceipt(txt) )
+			{
+				Arr2[1]= txt;   
+				Arr2[0]= "Pass";
+			}
+			 else if( arl.get(6).equals("Yes") && isClickedYes() )
+			{
+				Arr2[1] = "Selected User Service is = " + txt;
+				Arr2[0]="Pass";
+			}
+			 else if( arl.get(6).equals("BankNameAdharSeeding") && isClickedSBI() )
+			{
+				Arr2[1] = "Bank Name is Selected  ";
+				Arr2[0]="Pass";
+		    }
+			
+			else if(arl.get(6).equals("ClickReset"))
+			{
+				Arr2[1] =  "Data is Cleared";
+			}
+           else {
+                Arr2[0] = "Fail";
+                Arr2[1] = "Test Case Failed";
+            }
+        } catch (Exception e) {
+            System.out.println("Exception Message: " + e.getMessage());
+            try {
+                Arr2[0] = "Fail";
+                Arr2[1] = driver.findElement(By.xpath("//div[@class='userinfo']/font")).getText();
+            } catch (Exception ex) {
+                Arr2[0] = "Fail";
+                Arr2[1] = (Arr2[1] == null ? "" : Arr2[1]) +
+                        " /n Error caused due to unexpected flow or negative testcase. Check Screenshot.";
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    private void MoneyTransferandLoanDepositChkResult() throws InterruptedException {
+    	TrxnMessageReaderMoneyTransferandLoanDepositChkResult();
+        String timestamp = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a")
+                .format(Calendar.getInstance().getTime());
+
+        if (arl.size() > 7 && arl.get(6).equals(Arr2[0])) {
+            Arr2[0] = "Pass : " + timestamp;
+        } else {
+            Arr2[0] = "Fail : " + timestamp;
+        }
+
+        System.out.println("Status is: " + Arr2[0]);
+        System.out.println("Actual Result is: " + Arr2[1]);
+        Result.setResult(Arr2[0],Arr2[1]);
+    }
+    
+    public void TrxnMessageReaderMoneyTransferandLoanDepositChkResult() throws ElementNotInteractableException
+	{
+		try
+		{
+			if((arl.get(5).equals("EnterDepositorName") && ValidateDATATransactionsPage(arl.get(4))) || (arl.get(5).equals("EnterAddress")&& ValidateDATATransactionsPage(arl.get(4)) )|| (arl.get(5).equals("EnterAmount") && ValidateDATATransactionsPage(arl.get(4))) )
+			{
+				Arr2[1] = txt+ " is filled";
+				Arr2[0] = "Pass";
+			}
+			else if(( arl.get(5).equals("DeposittoLoanAccount") && isLoanDepositPageOpen() ))
+			{
+				Arr2[1] = txt+ " is open";
+				Arr2[0]="Pass";
+			}
+			else if((arl.get(5).equals("MoneyTransfer") && ValidateMoneyTransferPage() ))
+			{
+				Arr2[1] = "user is navigated "+txt+" page";
+				Arr2[0] = "Pass";
+			}
+			else if((arl.get(5).equals("ClickSubmit") &&  ValidateProceedButtonMoneyTransfer()))
+			{
+				Arr2[1] = "Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if((arl.get(5).equals("EnterAdhaarNumber") && isIdentificationNumberFilled()))
+			{
+				Arr2[1] = "Adhaar Number"+txt+" Entered.";
+				Arr2[0] = "Pass";
+			}
+			else if((arl.get(5).equals("EnterMobileNumber") && ValidateDATATransactionsPage(arl.get(4)) ))
+			{
+				Arr2[1] = "Mobile Number "+txt+" Entered.";
+				Arr2[0] = "Pass";
+			}
+			else if((arl.get(5).equals("ClickVerificationCode") && isProceedPopUpVisible()  ))
+			{
+				Arr2[1] = txt;
+				Arr2[0] = "Pass";
+			}
+			else if((arl.get(5).equals("ProceedPopUp") && isGreenTickVisible() ))
+			{
+				Arr2[1] = "Number Verified and Ready to proceed";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ClickConfirm") && isAgentAuthenticationPopupVisible() )
+			{
+				Arr2[1] = txt+" visible";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SuccessfulAuthorize") && isTransactionRecieptPageVisible())
+			{
+				Arr2[1] = "Receipt of "+txt+" Transaction Visible";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("select CIF") &&  selectCIFRadioButton()  )
+			{
+				Arr2[1] = "User Selected "+txt+" Transaction ";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("select ACC") &&  selectACCRadioButton() ) 
+			{
+				Arr2[1] = "User Selected "+txt+" Transaction ";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Enter Account Number") &&  ValidateDATATransactionsPage(arl.get(4)) ) 
+			{
+				Arr2[1] = "Account Number"+txt+" Entered.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Check Benificiary Acc Validation") && isBeneficiaryAccountNumberSelected() && isBeneficiaryAccountHolderNameFilled() &&  isBranchCodeFilled() && isAddressLine1Filled() )
+			{
+				Arr2[1] = " Benificiary Account Details "+txt+" "+txt1+" "+txt2+" "+txt3;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Check CIF Validation")&& getValidationMessageForCIF() )
+			{
+
+				Arr2[1] ="User got validation red tool tip "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Enter CIF") && ValidateDATATransactionsPage(arl.get(4)))
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("TransactionStatus") && WaitForTransactionReceipt())
+			{
+				Arr2[1]= "Successful";
+				Arr2[0]= "Pass";
+			}
+			/*LAMS*/
+			 else if(arl.get(5).equals("ViewLoanDataCollection") && isClickedViewLoanDataCollection() )
+			{
+				Arr2[1] = "Selected User Service is = " + txt;
+				Arr2[0]="Pass";
+			}
+			else if(arl.get(5).equals("Customer Name") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Account Number") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("ClickSearch") && ValidateTOSearch())
+			{
+				Arr2[1] = "Search button is clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Details") && ValidateTODetails())
+			{
+				Arr2[1] = "Details button is clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Follow Up") && ValidateTOFollowUP())
+			{
+				Arr2[1] = "Follow Up button is clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Contact Mode") && isOptionSelected(arl.get(4),"1"))
+			{
+				Arr2[1] = txt + " is Selected";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Date Follow Up") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Contacted Person") && isOptionSelected(arl.get(4),"2"))
+			{
+				Arr2[1] = txt + " is Selected";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Place Contacted") && isOptionSelected(arl.get(4),"3"))
+			{
+				Arr2[1] = txt + " is Selected";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Disposition") && isOptionSelected(arl.get(4),"4"))
+			{
+				Arr2[1] = txt + " is Selected";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SubDisposition") && isOptionSelected(arl.get(4),"5"))
+			{
+				Arr2[1] = txt + " is Selected";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("FollowUpComments") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Collection") && ValidateTOCollection() )    
+			{
+				Arr2[1] = "Collection button is clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Loan Account Number") && ValidateLoanAccountNumber(arl.get(4) ))
+			{
+				Arr2[1] = txt + " is Selected";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Account Holder Name") && textfieldgetvalue("1") )
+			{
+				Arr2[1] = "filled Loan Account Holder Name is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Account Branch Code") && textfieldgetvalue("2") )
+			{
+				Arr2[1] = "filled Loan Account Branch Code is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address Line 1") && textfieldgetvalue("3") )
+			{
+				Arr2[1] = "Verified Address Line 1 "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address Line 2") && textfieldgetvalue("4") )
+			{
+				Arr2[1] =  "Verified Address Line 2 "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address Line 3") && textfieldgetvalue("5") )
+			{
+				Arr2[1] =  "Verified Address Line 3 "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterDepositorName") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("EnterAmount") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("EnterAdhaarNumber") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("EnterAddress") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("EnterMobileNumber") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Account number") && textfieldgetvalue("1") )
+			{
+				Arr2[1] = "Verified Account number is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Account Name") && textfieldgetvalue("2") )
+			{
+				Arr2[1] = "Verified Account Name is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Branch Code") && textfieldgetvalue("3") )
+			{
+				Arr2[1] = "Verified Branch Code is "+txt;
+				Arr2[0] = "Pass";
+			}
+			
+			else if(arl.get(5).equals("Branch Name") && textfieldgetvalue("4") )
+			{
+				Arr2[1] =  "filled Branch Name is "+txt;
+				Arr2[0] = "Pass";
+			}
+			
+			else if(arl.get(5).equals("Address Line 4") && textfieldgetvalue("6") )
+			{
+				Arr2[1] =  "filled Address Line 4 is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Pincode") && textfieldgetvalue("7") )
+			{
+				Arr2[1] =  "filled Pincode is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Instrument Type ") && dropdownfieldgetvalue("2") )
+			{
+				Arr2[1] = "selected Instrument Type is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Chequebook Delivery Address") && dropdownfieldgetvalue("4") )
+			{
+				Arr2[1] = "selected Instrument Type is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("PROCEED_ENABLED") && ValidatePROCEEDButtonIsEnabled())
+			{
+				Arr2[1] = "Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SuccessfulAuthorize") )
+			{
+				Arr2[1] ="Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("YES, I DO") && ClickYesIDoButton())
+			{
+				Arr2[1] = "'YES, I DO' button is enabled and clicked.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Finger") && FingerPrint())   
+			{
+				Arr2[1] = "Customer FingerPrint Authentication Done and Proceed Button is Clickable";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("PROCEED_PopUp") && ValidatePROCEEDButtonPopUp())
+			{
+				Arr2[1] = "Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("TransactionStatus") && waitForTransactionReceipt(txt) )
+			{
+				Arr2[1]= txt;   
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("ChequeType") && ValidateDATATransactionsPage())
+			{
+				Arr2[1] = "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0] = "Pass";
+			}
+			else if( arl.get(5).equals("Reason for Stop Payment") && ValidateDATATransactionsPage())
+			{
+				Arr2[1] = "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("FROMChequeNumber") && ValidateFromChequeNumber() )
+			{
+				Arr2[1] = "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("TOChequeNumber") && ValidateTOChequeNumber() )
+			{
+				Arr2[1] = "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterAmount") && ValidateDATATransactionsPage()  )
+			{
+			Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+			Arr2[0]= "Pass";
+			}
+			else
+			{
+				Arr2[1] = " /n Error Caused due to some un expected Error or due to conditions of Negative testcase. Check Screenhot for clarity";
+				Arr2[0]="Fail";
+			}
+			
+		}
+		
+		catch(Exception e1)
+		{
+			Arr2[0] = "Fail";
+			Arr2[1] = " /n Error Caused due to some un expected Error or due to conditions of Negative testcase.";
+		}
+	}
+    
+    
+    
+    
+    private void SSSChkResult() throws InterruptedException {
+    	TrxnMessageReaderSSS();
+        String timestamp = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a")
+                .format(Calendar.getInstance().getTime());
+
+        if (arl.size() > 7 && arl.get(6).equals(Arr2[0])) {
+            Arr2[0] = "Pass : " + timestamp;
+        } else {
+            Arr2[0] = "Fail : " + timestamp;
+        }
+
+        System.out.println("Status is: " + Arr2[0]);
+        System.out.println("Actual Result is: " + Arr2[1]);
+        Result.setResult(Arr2[0],Arr2[1]);
+    }
+
+    public void TrxnMessageReaderSSS() throws ElementNotInteractableException
+    {
+    	
+
+		try
+		{
+			if(arl.get(5).equals("SSS"))
+			{
+				Arr2[1]= "Clicked Social Security Schemes Service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("PMJJBY"))
+			{
+				Arr2[1]= "Clicked PMJJBY Service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("PMSBY"))
+			{
+				Arr2[1]= "Clicked PMSBY Service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("APY"))
+			{
+				Arr2[1]= "Clicked PMSBY Service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("CIF") && handleInputFieldSSS("Enter CIF Number",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Enterd as CIF Number";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Account") && handleInputFieldSSS("Enter Account Number",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Enterd as Account Number";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("AccountDetails") && AccountDetailsRadioSSS())
+			{
+				Arr2[1]=  txt +" is selected  Account";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("ProceedToEnrolment") && ValidateProccedtoEnrolementClick() )
+			{
+				Arr2[1]= "Clicked Proceed To Enrolment Service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("FirstNamePD") && handleInputFieldSSS("Enter First Name",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("MiddleNamePD") && handleInputFieldSSS("Enter Middle Name",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("LastNamePD") && handleInputFieldSSS("Enter Middle Name",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("DOB") && handleInputFieldSSS("Enter ",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Gender") && handleInputFieldSSS("Gender",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Father/SpouseName") && handleInputFieldSSS("Enter Father/Spouse Name",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Bank/Post OfficeAccountNumber") && handleInputFieldSSS("Enter Bank/Post Office Account Number",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("IFSCCode") && handleInputFieldSSS("Enter IFSC Code",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("AddressLine1") && handleInputFieldSSS("Enter Address Line 1",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("AddressLine2") && handleInputFieldSSS("Enter Address Line 2",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("AddressLine3") && handleInputFieldSSS("Enter Address Line 2",arl.get(4),"2"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("State") && handleInputFieldSSS("Enter state",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("District") && handleInputFieldSSS("Enter district",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("City") && handleInputFieldSSS("City",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("MobileNumber") && handleInputFieldSSS("Enter Mobile Number",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("PanNumber") && handleInputFieldSSS("Enter PAN",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("NameKYCDocumentSubmitted") && handleInputFieldSSS("Name of the KYC Document Submitted",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}  
+			else if(arl.get(5).equals("KYCIDNumber") && handleInputFieldSSS("KYC ID Number",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("ConsentforAutoDebit") && handleInputFieldSSS("Consent for Auto Debit",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("PersonalDetailsExpand") && clickAccordion("Personal Details") )
+			{
+				Arr2[1]= txt+" Clicked ";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("NomineeDetailsExpand") && clickAccordion("Nominee Details") )
+			{
+				Arr2[1]= txt+" Clicked ";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("FirstNameND") && handleInputFieldSSS("Enter First Name",arl.get(4),"2"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("MiddleNameND") && handleInputFieldSSS("Enter Middle Name",arl.get(4),"2"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("LastNameND") && handleInputFieldSSS("Enter Last Name",arl.get(4),"2"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			} 
+			else if(arl.get(5).equals("DOB_ND") && ValidateDOBnominee() )
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("MobileNumber_ND") && handleInputFieldSSS("Enter Nominee Mobile Number",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Email_ND") && handleInputFieldSSS("Nominee Email ID",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			} 
+			else if(arl.get(5).equals("AdharNumber_ND") && handleInputFieldSSS("Enter Nominee Aadhaar Number",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			} 
+			else if(arl.get(5).equals("Disability") && selectFromCommonDropdown(arl.get(4),"1") )
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("RelationwithSubcriber_ND") && selectFromCommonDropdown(arl.get(4),"1") )
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("RelationwithSubcriber_ND_PMSBY") && selectFromCommonDropdown(arl.get(4),"2") )
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("State_ND_PMSBY") && selectFromCommonDropdown(arl.get(4),"3") )
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("District_ND_PMSBY") && selectFromCommonDropdownDistrict(arl.get(4)) )
+			{
+				                                  
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("City_ND_PMSBY") && selectFromCommonDropdown(arl.get(4),"5") )
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("IsNomineeMinor") && handleInputFieldSSS("is Nominee Minor",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("AddressLine1_ND") && handleInputFieldSSS("Enter Address Line 1",arl.get(4),"2"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("AddressLine2_ND") && handleInputFieldSSS("Enter Address Line 2",arl.get(4),"3"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("State_ND") && selectFromCommonDropdown(arl.get(4),"2") )
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("District_ND") && selectFromCommonDropdownDistrict(arl.get(4)) )
+			{
+				                                  
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("City_ND") && selectFromCommonDropdown(arl.get(4),"4") )
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Pincode_ND") && handleInputFieldSSS("Enter Pincode",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("ProceedButton") && ValidateProceedButtonMoneyTransfer() )
+			{
+				Arr2[1]= "Clicked Proceed Button";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("PaymentDetailsPage") && VisibleofPaymentDetailsPage() )
+			{
+				Arr2[1]= txt+" is visible";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Amount_PD") && handleInputFieldSSS("Enter Amount",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Charge_PD") && handleInputFieldSSS("Enter Service Charge",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("TotalAmount_PD") && handleInputFieldSSS("Enter Total Amount",arl.get(4),"1"))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("AgentAuth") && ValidateDATATransactionsPage(arl.get(4)))
+			{
+				Arr2[1]= txt+ " Entered";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("ProceedPopup") && VisibleofYesIdoButton() )
+			{
+				Arr2[1]= txt +" is visible";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("YesIDO") && ClickYesIDoButton())
+			{
+				Arr2[1]= txt+ " clicked";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("FingerPrint") && isFingerprintCaptured()) 
+			{
+				Arr2[1] = "Customer FingerPrint Authentication Done";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("FingerPrintProceed")  ) 
+			{
+				Arr2[1] = "finge print proceed  ";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("StatusPage") && VisibleofPMJJBYStatus() ) 
+			{
+				Arr2[1] = " Status Page is visible";
+				Arr2[0] = "Pass";
+			}
+			else
+			{
+				Arr2[1] = " /n Error Caused due to some un expected Error or due to conditions of Negative testcase. Check Screenhot for clarity";
+				Arr2[0]="Fail";
+			}
+		}
+			catch(Exception e)
+			{
+				Arr2[0] = "Fail";
+				Arr2[1] = " /n Error Caused due to some un expected Error or due to conditions of Negative testcase. Check Screenhot for clarity";
+			}
+    }
+    private void AadharLinksubKOChkResult() throws InterruptedException {
+    	AadharLinksubKOMessageReader();
+        String timestamp = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a")
+                .format(Calendar.getInstance().getTime());
+
+        if (arl.size() > 7 && arl.get(7).equals(Arr2[0])) {
+            Arr2[0] = "Pass : " + timestamp;
+        } else {
+            Arr2[0] = "Fail : " + timestamp;
+        }
+
+        System.out.println("Status is: " + Arr2[0]);
+        System.out.println("Actual Result is: " + Arr2[1]);
+        Result.setResult(Arr2[0],Arr2[1]);
+    }
+
+    
+    public void AadharLinksubKOMessageReader() throws ElementNotInteractableException
+    {
+    	
+    	try {
+    	if ( arl.get(5).equals("Aadhaar_Seeding_SubKO")  )
+		{
+			 Arr2[1] = "Selected User Service is = adhaar sub KO ";
+			 Arr2[0]="Pass";
+		}
+		 else if( arl.get(5).equals("AadhaarSeeding") && isClickedAdhaarSeeding() )
+		{
+			Arr2[1] = "Selected User Service is = " + txt;
+			Arr2[0]="Pass";
+		}
+		 else if(arl.get(5).equals("SubKO_ID") && selectSubKORadioButton()  )
+		{
+				Arr2[1] = "User Selected "+txt+" Radio Button ";
+				Arr2[0] = "Pass";
+		}
+		 else if(arl.get(5).equals("PROCEED_ENABLED") && ValidatePROCEEDButtonIsEnabled())
+			{
+				Arr2[1] = "Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+		 else if (arl.get(5).equals("EnterAdhaarNumber") && isClickedAdhaarNumber())
+		{
+				Arr2[1] = "User Entered Adhar Number = " + txt;
+				Arr2[0]="Pass";	
+		}
+		 else if(arl.get(5).equals("Finger") && FingerPrint())   
+		{
+				Arr2[1] = "Customer FingerPrint Authentication Done and Proceed Button is Clickable";
+				Arr2[0] = "Pass";
+		}
+		 else if (arl.get(5).equals("ClickProceed"))
+		{
+				Arr2[1] = "Proceed PopUP button is enable and clicked";
+				Arr2[0]="Pass";	
+		}
+		else if(arl.get(5).equals("YES, I DO") && ClickYesIDoButton())
+		{
+				Arr2[1] = "'YES, I DO' button is enabled and clicked.";
+				Arr2[0] = "Pass";
+		}
+		else if(arl.get(5).equals("PROCEED_PopUp") && ValidatePROCEEDButtonPopUp())
+		{
+			Arr2[1] = "Proceed button is enabled and clickable.";
+			Arr2[0] = "Pass";
+		}
+
+	 
+	else{
+			Arr2[0]=" /n Error Caused due to some un expected Error or due to conditions of Negative testcase. Check Screenhot for clarity";
+			Arr2[0]="Fail";
+						
+		}
+
+}
+catch(Exception ex)
+{
+Arr2[0] = "Fail";
+Arr2[1] = "No Alert is Active";
+}
+    }
+    
+    private void EaseBankingChkResult() throws InterruptedException {
+    	TrxnMessageReaderEaseServices();
+        String timestamp = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a")
+                .format(Calendar.getInstance().getTime());
+
+        if (arl.size() > 7 && arl.get(6).equals(Arr2[0])) {
+            Arr2[0] = "Pass : " + timestamp;
+        } else {
+            Arr2[0] = "Fail : " + timestamp;
+        }
+
+        System.out.println("Status is: " + Arr2[0]);
+        System.out.println("Actual Result is: " + Arr2[1]);
+        Result.setResult(Arr2[0],Arr2[1]);
+    }
+    
+    public void TrxnMessageReaderEaseServices() throws ElementNotInteractableException
+   	{
+   		try
+   		{
+   			if(arl.get(5).equals("Ease Banking") && ValidateATMCardBlock() )
+			{
+				Arr2[1]= "Clicked Ease Banking Service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Select Service") && ValidateServiceATMBlock(arl.get(6)))
+			{
+				Arr2[1]= "User Selected "+txt+"  service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Select SubService") && isRadioButtonSelectedAndStore())
+			{
+				Arr2[1]= "Clicked "+ txt+ " service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("Enter Selected sub Service Details") && ValidateDATATransactionsPage(arl.get(4)) )
+			{
+				Arr2[1]= "Customer enterder " +txt;
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("ClickSubmit"))
+			{
+				Arr2[1]= "Proceed button is enabled and clicked ";
+				Arr2[0]= "Pass";
+			}
+			
+			else if(arl.get(5).equals("Select Card") && isAtmCardRadioSelected(txt,"1") )
+			{
+				Arr2[1]= txt+" selected";
+				Arr2[0]= "Pass";
+			}
+			else if((arl.get(5).equals("ProceedPopUp") && isConfirmDetailsPageVisible() ))
+			{
+				Arr2[1] = txt+ " is Visible";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ClickConfirm") && isAgentAuthenticationPopupVisible() )
+			{
+				Arr2[1] = txt+" visible";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SuccessfulAuthorize") && isCustomerAuthenticationPageVisible() )
+			{
+				Arr2[1] = txt+ " is Visible";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("CustomerAuthentication") && isReciptPageVisible())
+			{
+				Arr2[1] = "Sucessfully Authorizes and "+txt+" page is visible";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Select Card2") && isAtmCardRadioSelected(txt,"1") )
+			{
+				Arr2[1] = txt+" Card Selected for block";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("TransactionStatus") && WaitForATMBlockStatusReceipt() )
+			{
+				Arr2[1]= "Successfully Blocked";
+				Arr2[0]= "Pass";
+			}
+   			
+			else if(arl.get(5).equals("Ease_Banking") && ValidateChequeBookRequest() )
+			{
+				Arr2[1]= "Clicked Ease Banking Service";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("ChequeBookRequest") && isClickedChequeBookRequest() )
+			{
+				Arr2[1] = "Selected User Service is = " + txt;
+				Arr2[0]="Pass";
+			}
+			else if(arl.get(5).equals("StopPaymentofCheque") && isClickedStopPaymentofCheque() )
+			{
+				Arr2[1] = "Selected User Service is = " + txt;
+				Arr2[0]="Pass";
+			}
+			else if(arl.get(5).equals("Enter Account Number") && ValidateDATATransactionsPage() )
+			{
+				Arr2[1]= "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("PROCEED_ENABLED") && ValidatePROCEEDButtonIsEnabled())
+			{
+				Arr2[1] = "Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Account number") && textfieldgetvalue("1") )
+			{
+				Arr2[1] = "filled Account number is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Account Name") && textfieldgetvalue("2") )
+			{
+				Arr2[1] = "filled Account Name is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Branch Code") && textfieldgetvalue("3") )
+			{
+				Arr2[1] = "filled Branch Code is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address Line 1") && textfieldgetvalue("3") )
+			{
+				Arr2[1] = "filled Branch Code is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Branch Name") && textfieldgetvalue("4") )
+			{
+				Arr2[1] =  "filled Branch Name is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address Line 2") && textfieldgetvalue("4") )
+			{
+				Arr2[1] =  "filled Address Line 2 "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address Line 3") && textfieldgetvalue("5") )
+			{
+				Arr2[1] =  "filled Address Line 3 "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address Line 4") && textfieldgetvalue("6") )
+			{
+				Arr2[1] =  "filled Address Line 4 is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Pincode") && textfieldgetvalue("7") )
+			{
+				Arr2[1] =  "filled Pincode is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Instrument Type ") && dropdownfieldgetvalue("3") )
+			{
+				Arr2[1] = "selected Instrument Type is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Chequebook Delivery Address") && dropdownfieldgetvalue("4") )
+			{
+				Arr2[1] = "selected Instrument Type is "+txt;
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("PROCEED_ENABLED") && ValidatePROCEEDButtonIsEnabled())
+			{
+				Arr2[1] = "Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SuccessfulAuthorize") )//////
+			{
+				Arr2[1] ="Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("YES, I DO") && ClickYesIDoButton())
+			{
+				Arr2[1] = "'YES, I DO' button is enabled and clicked.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Finger") && FingerPrint())   
+			{
+				Arr2[1] = "Customer FingerPrint Authentication Done and Proceed Button is Clickable";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("PROCEED_PopUp") && ValidatePROCEEDButtonPopUp())
+			{
+				Arr2[1] = "Proceed button is enabled and clickable.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("TransactionStatus") && waitForTransactionReceipt(txt) )
+			{
+				Arr2[1]= txt;   
+				Arr2[0]= "Pass";
+			}
+			else if(arl.get(5).equals("NumberOfChk") && ValidateDATATransactionsPage())
+			{
+				Arr2[1] = "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0] = "Pass";
+			}
+			else if( arl.get(5).equals("NumberOfChequeLeaves") && ValidateDATATransactionsPage())
+			{
+				Arr2[1] = "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NumberOfChequeLeaves") && ValidateDATATransactionsPage())
+			{
+				Arr2[1] = "Valid data '" + txt + "' is Entered/Selected in the focused field.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ClickConfirm") &&  isChequeBookRecieptPageVisible() )
+			{
+				Arr2[1] = txt+" visible";
+				Arr2[0] = "Pass";
+			}
+			 else 
+			{
+				Arr2[0] = " /n Error Caused due to some un expected Error or due to conditions of Negative testcase. Check Screenhot for clarity";
+				Arr2[0] = "Fail";
+			}
+   		}
+   		
+   		catch(Exception e1)
+   		{
+   			Arr2[0] = "Fail";
+   			Arr2[1] = " /n Error Caused due to some un expected Error or due to conditions of Negative testcase. Check Screenhot for clarity";
+   		}
+   	} 
+    
+    private void AccountOpeningChkResult() throws InterruptedException {
+    	TrxnMessageReaderAccountOpening();
+        String timestamp = new SimpleDateFormat("dd/MM/yyyy h:mm:ss a")
+                .format(Calendar.getInstance().getTime());
+
+        if (arl.size() > 7 && arl.get(7).equals(Arr2[0])) {
+            Arr2[0] = "Pass : " + timestamp;
+        } else {
+            Arr2[0] = "Fail : " + timestamp;
+        }
+
+        System.out.println("Status is: " + Arr2[0]);
+        System.out.println("Actual Result is: " + Arr2[1]);
+        Result.setResult(Arr2[0],Arr2[1]);
+    }
+    
+    
+    public void TrxnMessageReaderAccountOpening() throws ElementNotInteractableException, InterruptedException
+   	{
+   		try
+   		{  
+   			if(arl.get(5).equals("CustomerCreation") && ValidateAccountOpeningClick() )
+			{
+				Arr2[1] =  txt + " sub functionalities visible";
+				Arr2[0]="Pass";
+			}
+			else if(arl.get(5).equals("click eKYC") &&  ValidateeKYCClick())
+			{
+				Arr2[1] = "User is able to navigate Account open details Tab";
+				Arr2[0]="Pass";
+			}
+			else if(arl.get(5).equals("HaveReference") && isAtmCardRadioSelected(arl.get(6),arl.get(12)) )
+			{
+				Arr2[1] = txt+" is selected/Entered";
+				Arr2[0]="Pass";
+			}
+			else if((arl.get(5).equals("EnterAdhaarNumber") && isIdentificationNumberFilled()))
+			{
+				Arr2[1] = "Adhaar Number"+txt+" Entered.";
+				Arr2[0] = "Pass";
+			}
+			else if((arl.get(5).equals("EnterReferenceNumber") && handleInputField(arl.get(6),arl.get(4),arl.get(12))))
+			{
+				Arr2[1] = "Reference Number "+txt+" Entered.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("FingerPrintProceed") ) 
+			{
+				Arr2[1] = "finge print proceed  ";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("FingerPrint") && isFingerprintCaptured()) 
+			{
+				Arr2[1] = "Customer FingerPrint Authentication Done";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("okProceedPopup") && ValidateokProceedPopup() )
+			{
+				Arr2[1] = "ok button present and clicked ";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("OKpopUp")  )
+			{
+				Arr2[1] = "Ok pop up button enable and clicked";
+				Arr2[0] = "Pass";
+			}
+			else if((arl.get(5).equals("InitialDeposit") && handleInputField(arl.get(6),arl.get(4),arl.get(12))))
+			{
+				Arr2[1] = "Initial Deposit Amount "+txt+" Entered.";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("AccountOpenStatus") && AccountOpeningStatus() )
+			{
+				Arr2[1] =txt+ " and Account open successfully";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("GenarateForm") && ValidateGenarateFormButtonIsEnabled() )
+			{
+				Arr2[1] =txt+ " button enable and clicked";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("PrintForm") && ValidatePrintFormButtonIsEnabled() )
+			{
+				Arr2[1] =txt+ " button enable and clicked";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ClickSubmit") && ValidateProceedButtonMoneyTransfer() )
+			{
+				Thread.sleep(1000);
+				Arr2[1] = "Proceed button enable and clicked";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ClickSave") && ValidateButtonIsEnabled(arl.get(6)) )
+			{
+				Arr2[1] =txt+ " button enable and clicked";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ClickContinue") && ValidateButtonIsEnabled(arl.get(6)) )
+			{
+				Arr2[1] = txt+" button enable and clicked";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ClickOk") && ValidateButtonIsEnabled(arl.get(6)) )
+			{
+				Arr2[1] = txt+" button enable and clicked";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ClickYES,Ido") && ClickYesIDoButton() )
+			{
+				Arr2[1] = txt+" button enable and clicked";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SelectTitle") && validateDataInDropDown(arl.get(12)) )
+			{
+				Arr2[1] = txt+" is selected/Entered";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterFirstName") && handleInputField(arl.get(6),arl.get(4),arl.get(12)) )
+			{
+				Arr2[1] = txt+" is selected/Entered";
+				Arr2[0] = "Pass";
+			}
+			
+			else if(arl.get(5).equals("EnterMiddleName")&& handleInputField(arl.get(6),arl.get(4),arl.get(12)) )
+			{
+				Arr2[1] = txt+" is selected/Entered/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterLastName") && handleInputField(arl.get(6),arl.get(4),arl.get(12)) )
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterDOB") && handleInputField(arl.get(6),arl.get(4),arl.get(12)) )
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterMobileNumber") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SelectTaxResidencyStatus") && handleInputField(arl.get(6),arl.get(4),arl.get(12)) )
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SelectFORM") && isCustomerDetailsSectionVisible() )
+			{
+				Arr2[1] = "Form 60 is selected/Entered";
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterAddress1") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterAddress2") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterDistrictName") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SelectState") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterCity") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterSubDistrict") && validateDataInDropDown2(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterVillage/Taluka/Town") && validateDataInDropDown2(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterReligion") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterCaste") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterMartialStatus") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterEducationQualification") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterFather/Mother/Guardian") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			
+			else if(arl.get(5).equals("EnterFather/Mother/Guardian_FN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterFather/Mother/Guardian_MN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterFather/Mother/Guardian_LN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterMother_FN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterMother_MN") && validateAndInputIfEnabled(arl.get(4)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterMother_LN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NoOfDependents") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("OccupationType") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("OccupationSubType") && validateDataInDropDown2(arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			
+			else if(arl.get(5).equals("AnyExistingSBIUser") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("KOLinkedBranchCode") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SourceOfFund") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("FormType") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("DateOfSubmission") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("TransactionDate") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("AdhaarVRN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass"; 
+				
+			}
+			else if(arl.get(5).equals("AgricultureIncomePerAnnum") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass"; 
+			}
+			else if(arl.get(5).equals("OtherIncome") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass"; 
+			}
+			else if(arl.get(5).equals("Anualincome") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass"; 
+			}
+			else if(arl.get(5).equals("PAN_Applied") && isAtmCardRadioSelected(arl.get(6),"1"))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass"; 
+			}
+			else if(arl.get(5).equals("ATMCardRequired") && isAtmCardRadioSelected(arl.get(6),"2"))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass"; 
+			}
+			else if(arl.get(5).equals("NameOnATM") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Form60PageButtons") && isAccordionButtonClicked(arl.get(6),arl.get(12)) )
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SelectSpouseTitle") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterSpouse_FN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterSpouse_MN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterSpouse_LN") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterPinCode") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";	
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterPlaceofBirth") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("SelectOccupation") && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("OrganizationName") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Designation_Profession") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("AddreseeType") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("OVD_KYCDOCType") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("AddressProofNo") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address1") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address2") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Address3") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("State_eKYC") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("District") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Country_eKYC") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Pincode_eKYC") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Citizenship") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Religion") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("Category") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EffectiveDate") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("ExpieryDate") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("WantToNominateAPerson") && checkBoxSelectedOrNot(arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NomineeName") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NomineeAdress1") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NomineeAdress2") && handleInputField(arl.get(6),arl.get(4),arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NomineRealtionType")  && validateDataInDropDown(arl.get(12)))
+			{
+				Arr2[1] = txt+" is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NomineeDOB") && handleInputField(arl.get(6),arl.get(4),arl.get(12)) )
+			{
+				Arr2[1] = txt + " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NomineeAge") && handleInputField(arl.get(6),arl.get(4),arl.get(12)) )
+			{
+				Arr2[1] = txt + " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("EnterNomineeMobile") && handleInputField(arl.get(6),arl.get(4),arl.get(12)) )
+			{
+				Arr2[1] = txt + " is selected/Entered";			
+				Arr2[0] = "Pass";
+			}
+			else if(arl.get(5).equals("NomineeNameOnPassbook") && isAtmCardRadioSelected(arl.get(6),"3"))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass"; 
+			}
+			else if(arl.get(5).equals("LinkwithSHG") && isAtmCardRadioSelected(arl.get(6),"4"))
+			{
+				Arr2[1] =txt+ " is selected/Entered";			
+				Arr2[0] = "Pass"; 
+			}
+			else
+			{
+				Arr2[0] = "Fail";
+				Arr2[1] = " /n Error Caused due to some un expected Error or due to conditions of Negative testcase. Check Screenhot for clarity";
+			}
+
+		}
+		catch(NoAlertPresentException ex)
+		{
+			
+		}
+   		}
+    
+    
+    
+    
+    
+    
+    
+    // === Validation helpers ===
+    
+    public boolean selectCIFRadioButton() {  
+
+        // Wait for the CIF radio button to be clickable
+        WebElement cifRadio = driver.findElement(
+            By.xpath("//label[contains(text(),'CIF')]/preceding-sibling::input[@type='radio']"));
+
+        cifRadio.click(); // Click the radio button
+        if (cifRadio.isSelected()) {
+            txt="CIF";
+            return true;
+        } else {
+            return false;
+        }
+
+    } 
+public boolean selectACCRadioButton() {
+	  
+    // Wait for the CIF radio button to be clickable
+    WebElement accRadio = driver.findElement(
+        By.xpath("//label[contains(text(),'Account Number')]/preceding-sibling::input[@type='radio']"));
+
+    accRadio.click(); // Click the radio button
+    if (accRadio.isSelected()) {
+    	txt="ACC";
+        return true;
+    } else {
+        return false;
+    }
+
+} 
+    
+    public boolean isBeneficiaryAccountNumberSelected() {
+	    try {
+	        WebElement dropdown = driver.findElement(
+	            By.xpath("//select[option[contains(text(),'SB-')]]"));
+
+	        Select select = new Select(dropdown);
+	        WebElement selectedOption = select.getFirstSelectedOption();
+	        String value = selectedOption.getAttribute("value").trim();
+
+	        if (!value.isEmpty()) {
+	             // store in global variable if needed
+	            return true;
+	        } else {
+	            return false;
+	        }
+	    } catch (Exception e) {
+	        return false;
+	    }
+	}
+
+	public boolean isBeneficiaryAccountHolderNameFilled() {
+	    try {
+	        WebElement holderName = driver.findElement(
+	            By.xpath("//input[@placeholder='Enter Loan Account Holder Name']")
+	        );
+	       
+	        return !holderName.getAttribute("value").trim().isEmpty();
+	    } catch (Exception e) {
+	        //System.out.println("Account Holder Name is empty or not found.");
+	        return false;
+	    }
+	}
+
+	public boolean isBranchCodeFilled() {
+	    try {
+	        WebElement branchCode = driver.findElement(
+	            By.xpath("//input[@placeholder='Enter Loan Account Branch Code']")
+	        );
+	        String value=branchCode.getAttribute("value").trim();
+	        
+	        return !branchCode.getAttribute("value").trim().isEmpty();
+	    } catch (Exception e) {
+	       // System.out.println("Branch code is empty or not found.");
+	        return false;
+	    }
+	}
+	
+	public boolean isGreenTickVisible() {
+	    try {
+	        WebElement greenTick = driver.findElement(
+	            By.xpath("//img[contains(@src, 'GreenTickTwoNew') and @alt='GreenTickTwoNew']"));
+	        return greenTick.isDisplayed();
+	    } catch (NoSuchElementException e) {
+	        return false;
+	    }
+	}
+	
+public boolean isTransactionRecieptPageVisible() {
+	    
+        WebElement transactionpge = driver.findElement(
+            By.xpath("//div[@class='col' and contains(@style, 'text-align: right')]/p[normalize-space(text())='Money Transfer']")
+        );
+        String value = transactionpge.getText().trim();
+       
+       boolean verification=  transactionpge.isDisplayed();
+       if(verification)
+       {
+    	   txt=value;
+    	   return true;
+       }else return false;
+}
+
+
+
+public  boolean isAgentAuthenticationPopupVisible() {
+	    
+        WebElement mobilever = driver.findElement(
+            By.xpath("//p[normalize-space()='Agent Authentication']")
+        );
+        String value = mobilever.getText().trim();
+       
+       boolean verification= mobilever.isDisplayed();
+       if(verification)
+       {
+    	   txt=value;
+    	   return true;
+       }else return false;
+    
+}
+	
+	public  boolean getValidationMessageForCIF() {
+        // Common XPath that matches any <p> error message inside the CIF section
+        WebElement validationMsg = driver.findElement(By.xpath("//p[contains(@style, 'color: red')]"));
+        boolean str=validationMsg.isDisplayed();
+        
+        if(str)
+        {
+        	txt=validationMsg.getText();
+        	return true;
+        }
+        else
+        	return false;
+   	 
+    } 
+	public  boolean isAddressLine1Filled() {
+	    try {
+	        WebElement addressLine1 = driver.findElement(
+	            By.xpath("//input[@placeholder='Enter Address Line 1']")
+	        );
+	        String value=addressLine1.getAttribute("value").trim();
+	        
+	        return !addressLine1.getAttribute("value").trim().isEmpty();
+	    } catch (Exception e) {
+	       // System.out.println("Address Line 1 is empty or not found.");
+	        return false;
+	    }
+	}
+	
+    public boolean ValidateDATATransactionsPage(String Value)
+	{
+		WebElement focusedElement = driver.switchTo().activeElement();
+		String actualValue = focusedElement.getAttribute("value");
+		if(actualValue != null && actualValue.equals(Value))
+		{
+			txt= actualValue;
+			return true;
+		}
+		else return false;
+	}
+    
+    public boolean WaitForTransactionReceipt() throws InterruptedException {
+ 	   
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        // Wait until receipt container is visible
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.xpath("//img[contains(@src, 'print_black') and @alt='PrintBlack']")
+        ));
+
+        System.out.println("Receipt page loaded.");
+        Thread.sleep(4000); // Optional small wait for message to appear
+
+        // Check if "Transaction Successful" is displayed
+        List<WebElement> successMsg = driver.findElements(
+            By.xpath("//p[contains(text(), 'Transaction Successful')]")
+        );
+
+        if (!successMsg.isEmpty()) {
+            System.out.println("Transaction was successful.");
+            return true;
+        } else {
+            System.out.println("Transaction was failed.");
+            return false;
+        }
+}
+    
+    public boolean ValidateMoneyTransferPage()
+	{
+	       WebElement moneyTransfer = driver.findElement( By.xpath("//a[contains(text(),'Money Transfer')]"));
+	       boolean sc=moneyTransfer.isDisplayed();
+	       if(sc) {
+	    	   txt=moneyTransfer.getText();
+		  
+	    	   return true;
+	        }
+	       else return false;
+	    }
+
+public boolean ValidateProceedButtonMoneyTransfer() {
+		
+		// Check for screen-level proceed button
+		try{
+			WebElement validBtn = driver.findElement(By.xpath("//p[normalize-space()='Proceed']"));
+			 ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", validBtn);
+			txt = validBtn.getText();
+		 boolean isenabled = validBtn.isEnabled();
+			if (isenabled) {
+				((JavascriptExecutor) driver).executeScript("arguments[0].click();", validBtn);
+				
+				return true;		
+		}
+		}catch(Exception e)
+		{}	
+		return false;
+}
+
+public boolean isIdentificationNumberFilled() {
+    
+    WebElement inputField = driver.findElement(
+        By.xpath("//input[@placeholder='Enter Identification Number' or @placeholder='Enter Aadhaar Number']")
+    );
+    String value = inputField.getAttribute("value").trim();
+    txt=value;
+    return !value.isEmpty();
+}
+    private boolean ValidateAEPSTransactionsPage() {
+        WebElement page = driver.findElement(By.xpath("//label[contains(., 'AEPS')]"));
+        if (page.isDisplayed()) {
+            txt = page.getText();
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean isProceedPopUpVisible() {
+	    
+        WebElement mobilever = driver.findElement(
+            By.xpath("//p[normalize-space(text())='Mobile Number Verification Successful']")
+        );
+        String value = mobilever.getText().trim();
+       
+       boolean verification= mobilever.isDisplayed();
+       if(verification)
+       {
+    	   txt=value;
+    	   return true;
+       }else return false;
+    
+}
+
+    private boolean ValidateAccountTransactionsPage() {
+        WebElement page = driver.findElement(By.xpath("//label[contains(., 'Account')]"));
+        if (page.isDisplayed()) {
+            txt = page.getText();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean ValidatePROCEEDTransactionsPage() {
+        WebElement proceedBtn = driver.findElement(By.xpath("//p[text()='PROCEED']/parent::button"));
+        boolean isDisabled = !proceedBtn.isEnabled();
+        if (isDisabled) {
+            txt = proceedBtn.getText();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean ValidatePROCEEDButtonIsEnabled() {
+        try {
+            WebElement proceedBtn = driver.findElement(By.xpath("(//p[text()='PROCEED'])[1]"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", proceedBtn);
+
+            if (proceedBtn.isEnabled()) {
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", proceedBtn);
+                txt = proceedBtn.getText();
+
+                // Wait a bit for popup to appear
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(8));
+                try {
+                    // If the KYC popup appears, click on "UPDATE LATER"
+                    WebElement updateLater = wait.until(
+                            ExpectedConditions.visibilityOfElementLocated(
+                                    By.xpath("//p[text()='UPDATE LATER']/ancestor::button")
+                            )
+                    );
+                    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", updateLater);
+                } catch (Exception e) {
+                    // No popup appeared — continue normally
+                }
+
+                return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+
+    private boolean ValidatePROCEED_CONFIRMButtonIsEnabled() {
+        try {
+        	 
+        	// Wait for spinner to disappear
+            waitForSpinnerToDisappear(driver);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(8));
+            By proceedLocator = By.xpath("//p[contains(normalize-space(),'PROCEED')]/ancestor::*[self::button or self::div][1]");
+            WebElement proceedBtn = wait.until(ExpectedConditions.elementToBeClickable(proceedLocator));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", proceedBtn);
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", proceedBtn); 
+            txt = proceedBtn.getText();
+            
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+
+    private boolean ValidatePROCEEDButtonPopUp() {
+        try {
+        	
+            WebElement popupButton = driver.findElement(By.xpath("//div[@role='dialog']//button[.//p[text()='PROCEED']]"));
+            if (popupButton.isDisplayed()) {
+                txt = popupButton.getText();
+                popupButton.click();
+          
+                return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    private boolean ValidatePROCEEDButtonFig() {
+        try {
+            Thread.sleep(2000);
+            WebElement proceedBtn = driver.findElement(By.xpath("//div[@role='dialog']//button[.//p[text()='PROCEED']]"));
+            if (proceedBtn.isDisplayed()) {
+                txt = proceedBtn.getText();
+                // TODO: call FingerPrint.proccedFingerprintIfRequired() if that class exists
+                return true;
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    private boolean ClickYesIDoButton() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(8));
+        WebElement yesIDoBtn = wait.until(ExpectedConditions.visibilityOfElementLocated( 
+                By.xpath("//button[normalize-space()='YES, I DO']")));
+        if (yesIDoBtn.isDisplayed() && yesIDoBtn.isEnabled()) {
+            txt = yesIDoBtn.getText();
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", yesIDoBtn);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean ClickCheckBox() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
+        WebElement checkBox = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//button[.//*[name()='svg']]")));
+        checkBox.click();
+        WebElement witnessName = driver.findElement(By.xpath("//input[@placeholder='Enter Witness Name']"));
+        if (witnessName.isDisplayed()) {
+            txt = witnessName.getAttribute("value");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean FingerPrint() {
+        WebElement proceedBtn = driver.findElement(By.xpath("//div[@role='dialog']//button[.//p[text()='PROCEED']]"));
+        if (proceedBtn.isDisplayed() && proceedBtn.isEnabled()) {
+            txt = proceedBtn.getText();
+            proceedBtn.click();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean CusmFingerPrint() {
+        try {
+            int attempts = 0;
+            while (attempts < 3) {
+                driver.findElement(By.xpath("//div[@role='dialog']//button[.//p[text()='PROCEED']]")).click();
+                Thread.sleep(500);
+                try {
+                    driver.findElement(By.xpath("//p[normalize-space()='Retry']")).click();
+                    attempts++;
+                } catch (Exception e) {
+                    return true;
+                }
+            }
+        } catch (Exception ignored) {}
+        return false;
+    }
+
+    private boolean isTransactionSuccessful() {
+        try {
+            // 🔹 Handle "OK" popup if it appears
+            try {
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+                WebElement okButton = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                        By.xpath("//h5[text()='TRY AGAIN']/ancestor::div[contains(@class,'modal-content')]//p[text()='OK']/ancestor::button")
+                ));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", okButton);
+            } catch (Exception e) {
+            }
+            // 🔹 Now check if transaction failed message is visible
+            Thread.sleep(12000);
+            WebElement txnStatusMsg = driver.findElement(By.xpath("//p[normalize-space()='Transaction Failed']"));
+            String message = txnStatusMsg.getText();
+            if ("Transaction Failed".equalsIgnoreCase(message)) {
+                txt = message;
+                return false;
+            }
+        } catch (Exception ignored) {}
+        return true;
+    }
+
+
+    private boolean ValidateSBIBANKTransactionsPage() {
+        WebElement bankName = driver.findElement(By.xpath("//*[@class='css-1dimb5e-singleValue']"));
+        if (bankName.isDisplayed()) {
+            txt = bankName.getText();
+            return true;
+        }
+        return false;
+    }
+    
+    /* Validating AdharNumber page (Lingaraj Desai 06/06/2025) */
+	public boolean ValidateAADHAARNOTransactionsPage()
+	{
+		WebElement greentick= driver.findElement(By.xpath("(//img[@alt='GreenTickTwoNew'])[1]"));
+		boolean screen= greentick.isDisplayed();
+		if(screen)
+		{
+			txt= greentick.getText();
+			return true;
+		}
+		else return false;
+	}
+    
+	/* Validating AdharNumber page (Lingaraj Desai 06/06/2025) */
+	public boolean ValidateSecondAADHAARNOTransactionsPage()
+	{
+		WebElement greentick= driver.findElement(By.xpath("(//img[@alt='GreenTickTwoNew'])[2]"));
+		boolean screen= greentick.isDisplayed();
+		if(screen)
+		{
+			txt= greentick.getText();
+			return true;
+		}
+		else return false;
+	}
+	
+	/* Validating AdharNumber page (Lingaraj Desai 06/06/2025) */
+	public boolean ValidateThirdAADHAARNOTransactionsPage() {
+	    try {
+	        WebElement greentick = driver.findElement(By.xpath("(//img[@alt='GreenTickTwoNew'])[3]"));
+	        boolean screen = greentick.isDisplayed();
+	        if (screen) {
+	            txt = greentick.getText();
+	            return true;
+	        } else return false;
+	    } catch (Exception e) {
+	        WebElement greentick = driver.findElement(By.xpath("(//img[@alt='GreenTickTwoNew'])[2]"));
+	        boolean screen = greentick.isDisplayed();
+	        if (screen) {
+	            txt = greentick.getText();
+	            return true;
+	        } else return false;
+	    }
+	}
+	
+	
+    /*SSS validation*/
+    
+    
+    public boolean handleInputFieldSSS(String placeholder, String newValue,String indx) throws InterruptedException
+	{
+	     	
+		WebElement inputField =driver.findElement(By.xpath("(//input[@placeholder='"+ placeholder +"'])["+indx+"]"));
+	     // boolean isVisble = inputField.isDisplayed();
+	        boolean isDisabled = !inputField.isEnabled();
+	        boolean isReadOnly = inputField.getAttribute("readonly") != null;
+
+	        if (isDisabled || isReadOnly) {
+	            // Field is not editable — fetch and log existing value
+	            txt= inputField.getAttribute("value");
+	            System.out.println("Field is not editable. Existing value: " +txt);
+	            return true;
+	        } else {
+	            // Field is editable — clear and enter value
+	            inputField.click();
+	            inputField.sendKeys(Keys.CONTROL + "a"); // optionally use CONTROL+A + DELETE if needed
+	            inputField.sendKeys(Keys.DELETE);
+	            inputField.sendKeys(newValue);
+	            inputField.sendKeys(Keys.ENTER);
+	            txt= inputField.getAttribute("value");
+	            return true;
+	        }
+	      
+	    	  
+	    }
+	
+	public boolean ValidateDOBnominee()
+	{
+		WebElement inputField =driver.findElement(By.xpath("//input[@placeholder='MM/DD/YYYY']"));
+		boolean isVisble = inputField.isDisplayed();
+		if(isVisble)
+		{
+			txt = inputField.getAttribute("value");
+			return isVisble;
+		}
+		else return false;
+	}
+	
+	public boolean ValidateProccedtoEnrolementClick() throws InterruptedException
+	{
+	
+		 WebElement enrolprcdbtn= driver.findElement(By.xpath("//button[@class='proceedbutton']//p[contains(normalize-space(.),'Proceed for Enrollment')]"));
+		 boolean screen= enrolprcdbtn.isDisplayed();
+		if(screen)
+		{
+			txt= enrolprcdbtn.getText();
+			enrolprcdbtn.click();
+			Thread.sleep(600);
+			return true;
+		}
+		else return false;
+	}
+	
+	
+	
+	public boolean clickAccordion( String sectionTitle) throws InterruptedException {
+	    // Locate the accordion button by title text
+	    WebElement accordionBtn = driver.findElement(
+	        By.xpath("//button[contains(@class,'accordion-button')][.//p[text()='" + sectionTitle + "']]")
+	    );
+	    
+	    ((JavascriptExecutor) driver).executeScript(
+	            "arguments[0].scrollIntoView(true); window.scrollBy(0, 0);", accordionBtn
+	        );
+	    // Check aria-expanded
+	    String expanded = accordionBtn.getAttribute("aria-expanded");
+	    txt= accordionBtn.getText();
+	    if ("true".equals(expanded)) {
+	        // Already expanded → just click once
+	        accordionBtn.click();
+	        return true;
+	    } else if ("false".equals(expanded)) {
+	        // Not expanded → click to expand
+	        accordionBtn.click();
+	        return true;
+	    }
+	    return false; // fallback
+	}
+	
+	public boolean AccountDetailsRadioSSS()
+	{
+		WebElement radio =  driver.findElement(By.xpath("(//input[@type='radio' and @name='val'])[1]"));
+		boolean radioVisible = radio.isSelected();
+		if(!radioVisible)
+		{
+			radio.click();
+			WebElement radiodetails =  driver.findElement(By.xpath("(//div[contains(@class,'row') and contains(.,'XXXXXXX1023')])[2]"));
+			txt= radiodetails.getText();
+			return radioVisible;
+		} else return false;
+	}
+	
+	 public boolean selectFromCommonDropdown(String value,String indx) {
+	        try {
+	            WebElement dropdownElement = driver.findElement(By.xpath("(//select[contains(@class,'select-dropdown')])["+indx+"]"));
+	            Select dropdown = new Select(dropdownElement);
+	            dropdown.selectByVisibleText(value);
+	            txt= dropdownElement.getAttribute("value");
+	            return true;
+	        } catch (Exception e) {
+	            return false;
+	        }
+	    }
+	 public  boolean selectFromCommonDropdownDistrict(String value) {
+	        try {
+	        	driver.findElement(By.xpath(
+	        		    "//select[contains(@class,'select-dropdown')]/option[contains(normalize-space(.),'"+value+"')]"
+	        		)).click();
+
+	            return true;
+	        } catch (Exception e) {
+	            return false;
+	        }
+	    }
+	 
+	 public boolean VisibleofPaymentDetailsPage()
+   		{
+		 WebElement paymentDetailsPage  = driver.findElement(By.xpath("//p[text()='Payment Details']"));
+		 boolean visibility = paymentDetailsPage.isDisplayed();
+		 txt = paymentDetailsPage.getText();
+		 return visibility;
+   		}
+	
+	 public boolean VisibleofYesIdoButton()
+	 {
+		 WebElement  YesIdoButton = driver.findElement(By.xpath("//button[normalize-space(text())='YES, I DO']"));
+		 boolean visibility = YesIdoButton.isDisplayed();
+		 txt = YesIdoButton.getText();
+		 return visibility;
+	 }
+	 
+	 public  boolean VisibleofPMJJBYStatus() throws InterruptedException
+	 {
+		 WebElement  YesIdoButton = driver.findElement(By.xpath("//p[text()='Social Security Schemes PMJJBY']"));
+		 boolean visibility = YesIdoButton.isDisplayed();
+		 txt = YesIdoButton.getText();
+		 Thread.sleep(500);
+		 return visibility;
+	 }
+	 
+	 public boolean isFingerprintCaptured()
+		{
+			
+			WebElement figcap= driver.findElement(By.xpath("//p[contains(text(),'Finger Print Captured Successfully')]"));
+			boolean screen= figcap.isDisplayed();
+			if(screen)
+			{
+				txt= figcap.getText();
+				
+				return true;
+			}
+			else return false;
+		}
+		
+    /*Ease banking*/
+    
+
+public boolean isReciptPageVisible()
+{
+	try {
+        WebElement recieptpg = driver.findElement(By.xpath("//p[normalize-space(text())='ATM Card Block']"));
+        boolean selected = recieptpg.isDisplayed();
+        txt=recieptpg.getText();
+        return selected;
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+        return false;
+    }
+}
+
+public  boolean WaitForATMBlockStatusReceipt() throws InterruptedException {
+	   
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+    // Wait until receipt container is visible
+    wait.until(ExpectedConditions.visibilityOfElementLocated(
+        By.xpath("//p[text()='ATM Card Block']")
+    ));
+
+    System.out.println("Receipt page loaded.");
+    Thread.sleep(4000); // Optional small wait for message to appear
+
+    // Check if "Transaction Successful" is displayed
+    List<WebElement> successMsg = driver.findElements(
+        By.xpath("//p[contains(text(), 'Transaction Successful')]")
+    );
+
+    if (!successMsg.isEmpty()) {
+        System.out.println("Card Blocked successful.");
+        return true;
+    } else {
+        System.out.println("Card Blocked was failed.");
+        return false;
+    }
+}
+public boolean isCustomerAuthenticationPageVisible()
+{
+	try {
+        WebElement custauthpg = driver.findElement(By.xpath("//p[normalize-space(text())='Customer Authentication']"));
+        boolean selected = custauthpg.isDisplayed();
+        txt=custauthpg.getText();
+        return selected;
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+        return false;
+    }
+}
+public boolean isConfirmDetailsPageVisible()
+{
+	try {
+        WebElement confirmdetailspg = driver.findElement(By.xpath("//p[text()='Confirm Details']"));
+        boolean selected = confirmdetailspg.isDisplayed();
+        txt=confirmdetailspg.getText();
+        return selected;
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+        return false;
+    }
+}
+
+public  boolean isAtmCardRadioSelected(String value,String index) {
+    try {
+        WebElement radioBtn = driver.findElement(By.xpath("(//input[@type='radio' and @id='"+value+"'])["+index+"]"));
+        boolean selected = radioBtn.isSelected();
+        txt=radioBtn.getAttribute("value");
+        return selected;
+    } catch (Exception e) {
+        System.out.println(e.getMessage());
+        return false;
+    }
+}
+
+public  boolean ValidateATMCardBlock() {
+    WebElement atm = driver.findElement( By.xpath("//a[text()='ATM Card Block Service']"));
+boolean sc=atm.isDisplayed();
+
+if(sc) {
+	  //txt=moneyTransfer.getText();
+	  
+     return true;
+     }
+else
+	  return false;
+ }
+public boolean ValidateServiceATMBlock(String expectedServiceName) {
+	 List<WebElement> services = driver.findElements(By.xpath(
+		        "//a[text()='ATM Card Block Service' or text()='Cheque Book Request' or text()='Stop Payment of Cheque']"
+		    ));
+
+		    for (WebElement service : services) {
+		        String classes = service.getAttribute("class"); // e.g., "nav-link active"
+		        txt = service.getText().trim();
+
+		        if (classes.contains("active")) {
+		            System.out.println("Active Service: " + txt);
+		            return txt.equalsIgnoreCase(expectedServiceName); // true if matches expected
+		        }
+		    }
+
+		    System.out.println("No active service found.");
+		    return false;
+   }
+  
+public  boolean isRadioButtonSelectedAndStore() {
+    try {
+        List<WebElement> radioButtons = driver.findElements(By.name("option"));
+        for (WebElement radio : radioButtons) {
+            if (radio.isSelected()) {
+               txt = radio.getAttribute("id");
+                return true;
+            }
+        }
+    } catch (Exception e) {
+    	
+        System.out.println(e.getMessage());
+    }
+    return false;
+}
+
+
+
+/*Account Opening method*/
+
+public boolean isAccordionButtonClicked(String value, String index) {
+    try {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        
+     
+        WebElement button = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.xpath("(//h2[@class='accordion-header']//button[p[text()='" + value + "']])[" + index + "]")
+        ));
+        
+        // Scroll into view with an offset so it’s not hidden under sticky header
+        ((JavascriptExecutor) driver).executeScript(
+            "arguments[0].scrollIntoView(true); window.scrollBy(0, -100);", button
+        );
+
+        // Wait until clickable (no overlay, visible, enabled)
+        wait.until(ExpectedConditions.elementToBeClickable(button));
+
+        boolean selected = button.isSelected();
+        txt = button.getText();
+
+        // Click only if not already expanded
+        if (!selected) {
+            try {
+                button.click();
+            } catch (ElementClickInterceptedException e) {
+                // Fallback: JavaScript click if normal click fails
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", button);
+            }
+            selected = !selected;
+        }
+        return selected;
+
+    } catch (Exception e) {
+        System.out.println("Accordion click failed: " + e.getMessage());
+        return false;
+    }
+}
+
+
+
+
+
+
+public boolean checkBoxSelectedOrNot(String index)
+{
+	
+	WebElement checkBox = driver.findElement(By.xpath("(//input[@type='checkbox'])["+index+"]"));
+	boolean checkboxClicked =checkBox.isSelected();
+	if(!checkboxClicked)
+	{
+		checkBox.click();
+		checkboxClicked = !checkboxClicked ;
+	}
+	return checkboxClicked;
+}
+
+
+
+public boolean validateAndInputIfEnabled(String expectedValue) {
+    WebElement inputField = driver.findElement(By.xpath("//input[@placeholder=\"Enter Mother's Middle Name\" ]"));
+    boolean isEnabled = inputField.isEnabled();
+    txt = inputField.getAttribute("value");
+
+    if (isEnabled) {
+        inputField.clear();
+        inputField.sendKeys(expectedValue);
+        txt= inputField.getAttribute("value");
+        return true; // Value entered successfully
+    } else if (!isEnabled && expectedValue.equalsIgnoreCase(txt)) {
+        return true; // Disabled but already has correct value
+    }
+
+    return false; // Neither condition passed
+}
+
+public boolean isCustomerDetailsSectionVisible() {
+    try {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        WebElement customerDetailsHeader = wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.xpath("//button[@class='accordion-button' and @aria-expanded='true']//p[text()='Customer Details']")
+        ));
+
+        return customerDetailsHeader.isDisplayed();
+    } catch (TimeoutException e) {
+        System.out.println("Timed out waiting for Customer Details section to become visible.");
+        return false;
+    } catch (Exception e) {
+        System.out.println("Error while checking Customer Details visibility: " + e.getMessage());
+        return false;
+    }
+}
+
+/*Validating Save button is enebled and clickable(Arindam Harh ,12/08/2025)*/
+
+public boolean ValidateButtonIsEnabled(String text) {
+	
+	// Check for screen-level proceed button
+	try{
+		WebElement validBtn = driver.findElement(By.xpath("//button[.//p[text()='"+text+"']]"));
+		txt = validBtn.getText();
+	 boolean isenabled = validBtn.isEnabled();
+		if (isenabled) {
+			validBtn.click();
+			
+			return true;		
+	}
+	}catch(Exception e)
+	{}	
+	return false;
+}
+
+public boolean ValidatePrintFormButtonIsEnabled() {
+	
+	// Check for screen-level proceed button
+	try{
+		WebElement validBtn = driver.findElement(By.xpath("//button[normalize-space(.)='PRINT FORM']"));
+		txt = validBtn.getText();
+	 boolean isenabled = validBtn.isEnabled();
+		if (isenabled) {
+			validBtn.click();
+			
+			return true;		
+	}
+	}catch(Exception e)
+	{}	
+	return false;
+}
+
+public boolean validateDataInDropDown(String indx)
+{
+	 WebElement inputField = driver.findElement(
+	            By.xpath("(//div[contains(@class,'singleValue')])["+indx+"]")
+	        );
+	 boolean sc= inputField.isDisplayed();
+	 if(sc) {
+	        String value = inputField.getText();
+	        txt=value;
+	        return true;
+	 }
+	        else return false;
+
+}
+
+public boolean validateDataInDropDown2(String indx)
+{
+	 WebElement inputField = driver.findElement(
+	            By.xpath("(//div[contains(@id, 'react-select') and contains(@class, 'placeholder')]/div)["+indx+"]"));
+	 boolean sc= inputField.isDisplayed();
+	 if(sc) {
+	        String value = inputField.getText();
+	        txt=value;
+	        return true;
+	 }
+	        else return false;
+
+}
+
+
+
+
+/*Validating Genarate Form button is enebled and clickable(Arindam Harh ,12/08/2025)*/
+
+public boolean ValidateGenarateFormButtonIsEnabled() {
+	
+	// Check for screen-level proceed button
+	try{
+		WebElement validBtn = driver.findElement(By.xpath("//p[normalize-space(.)='GENERATE FORM']"));
+		txt = validBtn.getText();
+	 boolean isenabled = validBtn.isEnabled();
+		if (isenabled) {
+			validBtn.click();
+			
+			return true;		
+	}
+	}catch(Exception e)
+	{}	
+	return false;
+}
+
+
+public boolean AccountOpeningStatus() {
+	
+	// Check for screen-level proceed button
+	try{
+		WebElement validBtn = driver.findElement(By.xpath("//p[text()='Initial Deposit Successful']"));
+		txt = validBtn.getText();
+	 boolean isvisible = validBtn.isDisplayed();
+		if (isvisible) {	
+			return true;		
+	}
+	}catch(Exception e)
+	{}	
+	return false;
+}
+
+public boolean ValidateokProceedPopup()
+{
+	
+	WebElement okButton = driver.findElement(By.xpath("//h5[normalize-space()='Try Again']"));
+	boolean tryagain=okButton.isDisplayed();
+
+	if (tryagain) {
+		OkPopUP(); 
+		return true;
+	} else {
+	    System.out.println("❌ eKYC button is not clicked/active.");
+	    return false;
+	}
+
+}
+
+public void OkPopUP() {
+    try {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        WebElement okButton = wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.xpath("//button[.//p[contains(text(), 'OK')]]")));
+
+        if (okButton.isDisplayed()) {
+            okButton.click();
+        }
+    } catch (Exception e) {}
+}
+
+/*
+ * Account Opening click Validation
+ */
+	public boolean ValidateAccountOpeningClick()
+	{
+		
+		WebElement subfunc= driver.findElement(By.xpath("//a[@data-rr-ui-event-key='link-EKYC']"));
+		boolean screen= subfunc.isDisplayed();
+		if(screen)
+		{
+			txt= subfunc.getText();
+			subfunc.click();
+			return true;
+		}
+		else return false;
+	}
+	
+public boolean ValidateeKYCClick ()
+{
+	
+	WebElement ekycButton = driver.findElement(By.xpath("//a[@data-rr-ui-event-key='link-EKYC']"));
+	String classValue = ekycButton.getAttribute("class");
+
+	if (classValue.contains("active")) {
+	    return true;
+	} else {
+	    System.out.println("❌ eKYC button is not clicked/active.");
+	    return false;
+	}
+
+}
+
+
+public boolean handleInputField(String placeholder, String newValue,String indx) {
+    try {
+    	
+        WebElement inputField =driver.findElement(By.xpath("(//input[@placeholder='"+ placeholder +"'])["+indx+"]"));
+
+        boolean isDisabled = !inputField.isEnabled();
+        boolean isReadOnly = inputField.getAttribute("readonly") != null;
+
+        if (isDisabled || isReadOnly) {
+            // Field is not editable — fetch and log existing value
+            txt= inputField.getAttribute("value");
+            System.out.println("Field is not editable. Existing value: " +txt);
+            return true;
+        } else {
+            // Field is editable — clear and enter value
+            inputField.click();
+            inputField.sendKeys(Keys.CONTROL + "a"); // optionally use CONTROL+A + DELETE if needed
+            inputField.sendKeys(Keys.DELETE);
+            inputField.sendKeys(newValue);
+            inputField.sendKeys(Keys.ENTER);
+            txt= inputField.getAttribute("value");
+            Thread.sleep(1000);
+            return true;
+        }
+
+    } catch (Exception e) {
+       //System.out.println("Error handling input field: " + e.getMessage());
+    	try {  WebElement inputField =driver.findElement(By.xpath("(//input[@placeholder='"+ placeholder +"'])["+indx+"]"));
+    	  boolean isDisabled = !inputField.isEnabled();
+	        boolean isReadOnly = inputField.getAttribute("readonly") != null;
+	        if (isDisabled || isReadOnly) {
+	            // Field is not editable — fetch and log existing value
+	            txt= inputField.getAttribute("value");
+	            System.out.println("Field is not editable. Existing value: " +txt);
+	            return true;
+	        } else {
+    	((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", inputField);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", inputField);
+
+        inputField.sendKeys(Keys.CONTROL + "a"); // optionally use CONTROL+A + DELETE if needed
+        inputField.sendKeys(Keys.DELETE);
+        inputField.sendKeys(newValue);
+        txt= inputField.getAttribute("value");
+        return true;
+	        }
+    	}catch(Exception e1)
+    	{ return false;}
+    }
+}
+
+
+/*
+* Nitin
+*/
+public boolean isChequeBookRecieptPageVisible() {
+	    
+      WebElement mobilever = driver.findElement(
+          By.xpath("(//p[normalize-space(.)='Cheque Book Request'])[1]")
+      );
+      String value = mobilever.getText().trim();
+     
+     boolean verification= mobilever.isDisplayed();
+     if(verification)
+     {
+  	   txt=value;
+  	   return true;
+     }else return false;
+}
+
+/*
+ * TransactionReceipt
+ * Nitin
+ */
+
+public boolean waitForTransactionReceipt(String expectedMessage) {
+    try {
+        WebElement txnStatusMsg = driver.findElement(By.xpath("//p[text()='" + expectedMessage + "']"));
+        if (txnStatusMsg.isDisplayed()) {
+            txt = txnStatusMsg.getText();  // You may already have 'txt' declared elsewhere
+            return true;
+        }
+    } catch (Exception e) {
+        // Optional: log the exception if needed
+    }
+    return false;
+}
+
+public boolean dropdownfieldgetvalue(String index)
+		{
+			WebElement dropdown = driver.findElement(By.xpath("(//select[@class='select-dropdown'])[" + index + "]"));
+			if (dropdown.isDisplayed()) {
+	            Select select = new Select(dropdown);
+	            txt = select.getFirstSelectedOption().getText();  // Same global variable txt
+	            return true;
+	        }
+			else return false;
+		}	
+
+/* Validating enterd data is valid on page (Lingaraj Desai 06/06/2025) */
+public boolean ValidateDATATransactionsPage()
+{
+	WebElement focusedElement = driver.switchTo().activeElement();
+	String actualValue = focusedElement.getAttribute("value");
+	if(actualValue != null && actualValue.equals(arl.get(4)))
+	{
+		txt= actualValue;
+		return true;
+	}
+	else return false;
+}
+
+public boolean ValidateChequeBookRequest() {
+    WebElement moneyTransfer = driver.findElement( By.xpath("//a[contains(@class, 'nav-link') and contains(text(), 'Cheque Book Request')]"));
+boolean sc=moneyTransfer.isDisplayed();
+
+if(sc) {
+	  //txt=moneyTransfer.getText();
+	  
+     return true;
+     }
+else
+	  return false;
+ }
+
+public boolean isLoanDepositPageOpen()
+{
+       
+       	WebElement loanDepositpage = driver.findElement(By.xpath("//p[text()='Enter Loan Account Details']"));
+
+           if (loanDepositpage.isDisplayed()) {
+               txt=loanDepositpage.getText();
+               return true;
+           } else {
+               
+               return false;
+
+       } 	   
+           }
+
+
+
+/*
+ * Ease Banking Clicked Validation
+ * Nitin 
+ */
+
+public  boolean isClickedChequeBookRequest()
+{
+	WebElement clickadharseeding=driver.findElement(By.xpath("//a[contains(@class, 'nav-link') and contains(text(), 'Cheque Book Request')]"));
+	
+	boolean clickcheck=clickadharseeding.isDisplayed();
+	if(clickcheck)
+	{
+		txt=clickadharseeding.getText();
+		return true;
+	}
+	else return false;
+}
+
+public  boolean isClickedStopPaymentofCheque()
+{
+	WebElement clickadharseeding=driver.findElement(By.xpath("//a[contains(@class, 'nav-link') and contains(text(), 'Stop Payment of Cheque')]"));
+	
+	boolean clickcheck=clickadharseeding.isDisplayed();
+	if(clickcheck)
+	{
+		txt=clickadharseeding.getText();
+		return true;
+	}
+	else return false;
+}
+
+
+
+public  boolean textfieldgetvalue(String index)
+{
+	WebElement clickadharseeding=driver.findElement(By.xpath("(//input[contains(@class, 'MuiOutlinedInput-input') and contains(@class, 'Mui-disabled')])["+index+"]"));
+	
+	boolean clickcheck=clickadharseeding.isDisplayed();
+	if(clickcheck)
+	{
+		txt=clickadharseeding.getAttribute("value");
+		return true;
+	}
+	else return false;
+}
+
+
+
+/*View LoanData Collections*/
+
+public  boolean isClickedViewLoanDataCollection()
+{
+	WebElement clickadharseeding=driver.findElement(By.xpath("//a[contains(@class, 'nav-link') and contains(text(), 'View Loan Data Collection')]"));
+	
+	boolean clickcheck=clickadharseeding.isDisplayed();
+	if(clickcheck)
+	{
+		txt=clickadharseeding.getText();
+		return true;
+	}
+	else return false;
+
+}
+
+
+/* Validating From Cheque (Nitin Lawate 11/08/2025) */    
+
+public boolean ValidateFromChequeNumber()
+{
+	WebElement greentick= driver.findElement(By.xpath("(//input[@type='text' and @maxlength='11'])[1]"));
+	boolean screen= greentick.isDisplayed();
+	if(screen)
+	{
+		txt= greentick.getText();
+		return true;
+	}
+	else return false;
+}
+
+/* Validating TO Cheque (Nitin Lawate 12/08/2025) */    
+
+public boolean ValidateTOChequeNumber()
+{
+	WebElement greentick= driver.findElement(By.xpath("(//input[@type='text' and @maxlength='11'])[2]"));
+	boolean screen= greentick.isDisplayed();
+	if(screen)
+	{
+		txt= greentick.getText();
+		return true;
+	}
+	else return false;
+}
+
+/* Validating TO Search (Nitin Lawate 26/08/2025) */    
+
+public boolean ValidateTOSearch()
+{
+	WebElement greentick= driver.findElement(By.xpath("(//p[contains(normalize-space(.), 'Search')])[2]"));
+	boolean screen= greentick.isDisplayed();
+	if(screen)
+	{
+		txt= greentick.getText();
+		return true;
+	}
+	else return false;
+}
+
+/* Validating TO Details (Nitin Lawate 26/08/2025) */    
+
+public boolean ValidateTODetails()
+{
+	WebElement greentick= driver.findElement(By.xpath("(//div[text()='Details'])[1]"));
+	boolean screen= greentick.isDisplayed();
+	if(screen)
+	{
+		txt= greentick.getText();
+		return true;
+	}
+	else return false;
+}
+
+/* Validating TO Follow UP (Nitin Lawate 26/08/2025) */     
+
+public boolean ValidateTOFollowUP()
+{
+	WebElement greentick= driver.findElement(By.xpath("(//p[contains(text(),'Follow Up')])[2]"));
+	boolean screen= greentick.isDisplayed();
+	if(screen)
+	{
+		txt= greentick.getText();
+		return true;
+	}
+	else return false;
+}
+
+/* Validating TO Collection (Nitin Lawate 28/08/2025) */     
+
+public boolean ValidateTOCollection()
+{
+WebElement greentick= driver.findElement(By.xpath("//p[contains(text(),'Collection')]"));
+boolean screen= greentick.isDisplayed();
+if(screen)
+{
+	txt= greentick.getText();
+	return true;
+}
+else return false;
+}
+
+
+ public boolean isOptionSelected( String expectedValue, String indx) {
+	    WebElement dropdownElement = driver.findElement(By.xpath("(//select[@style='width: 100%; height: 56px; background-color: white; padding: 8px;'])["+indx+"]"));
+        Select select = new Select(dropdownElement);
+        String selectedText = select.getFirstSelectedOption().getText().trim();
+        txt= selectedText;
+        return selectedText.equalsIgnoreCase(expectedValue);
+    }
+/*
+ * Nitin
+ * Loan Account Number Dropdown 
+ */
+ public boolean ValidateLoanAccountNumber( String expectedValue) {
+	    WebElement dropdownElement = driver.findElement(By.xpath("//select[@style='width: 100%; height: 56px; background-color: white; padding: 8px; cursor: pointer;']"));
+        Select select = new Select(dropdownElement);
+        String selectedText = select.getFirstSelectedOption().getText().trim();
+        txt= selectedText;
+        return selectedText.equalsIgnoreCase(expectedValue);
+    }
+
+
+
+
+
+/*Adhaar sub ko*/
+
+/*
+ * Nitin Adhar seeding validations
+ */
+
+public boolean isClickedAdhaarSeeding()
+{
+	WebElement clickadharseeding=driver.findElement(By.xpath("//p[@class='CardLabel' and contains(normalize-space(), 'Aadhaar Seeding')]"));
+	
+	boolean clickcheck=clickadharseeding.isDisplayed();
+	if(clickcheck)
+	{
+		txt=clickadharseeding.getText();
+		return true;
+	}
+	else return false;
+}
+
+public boolean selectSubKORadioButton() {
+	  
+    
+
+    // Wait for the SubKO radio button to be clickable
+    WebElement SubKORadio = driver.findElement(
+        By.xpath("//input[@type='radio' and @name='account' and @value='account']"));
+
+    SubKORadio.click(); // Click the radio button
+    if (SubKORadio.isSelected()) {
+        txt="account";
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+public boolean isClickedAdhaarNumber()
+{
+	WebElement clickadharseeding=driver.findElement(By.xpath("//input[@placeholder='Enter Identification Number' or @placeholder='Enter Aadhaar Number']"));
+	
+	boolean clickcheck=clickadharseeding.isDisplayed();
+	if(clickcheck)
+	{
+		txt=clickadharseeding.getAttribute("value");
+		return true;
+	}
+	else return false;
+}
+
+
+
+/*Adhaae seding deseeding*/
+
+
+public boolean isClickedAgentAdhaarSeeding() 
+{
+    
+	WebElement agentAdhaarSeeding = driver.findElement(By.xpath("(//a[@role='button' and contains(text(), 'Aadhaar Seeding') and contains(@class, 'nav-link')])[1]"));
+
+    if (agentAdhaarSeeding.isDisplayed()) {
+        txt=agentAdhaarSeeding.getText();
+        return true;
+    } else {
+        
+        return false;
+
+  } 
+}
+
+public boolean isClickedAdhaarDeSeeding()
+{
+	WebElement clickadharDeseeding=driver.findElement(By.xpath("//p[@class='CardLabel' and contains(normalize-space(), 'Aadhaar De-Seeding')]"));
+	
+	boolean clickcheck=clickadharDeseeding.isDisplayed();
+	if(clickcheck)
+	{
+		txt=clickadharDeseeding.getText();
+		return true;
+	}
+	else return false;
+}
+
+public boolean isClickedAccountNumber()
+{
+	WebElement clickadharseeding=driver.findElement(By.xpath("//input[@placeholder='Enter Account Number']"));
+	
+	boolean clickcheck=clickadharseeding.isDisplayed();
+	if(clickcheck)
+	{
+		txt=clickadharseeding.getAttribute("value");
+		return true;
+	}
+	else return false;
+}
+
+public boolean isClickedYes() {
+    
+	WebElement clickYes = driver.findElement(By.xpath("//div[@class='css-1dimb5e-singleValue' and text()='YES']"));
+
+    if (clickYes.isSelected()) {
+        txt=clickYes.getText();
+        return true;
+    } else {
+        
+        return false;
+
+  } 
+}
+
+public boolean isClickedSBI() {
+ 	WebElement clickSBI = driver.findElement(By.xpath("//option[@value='000607261']"));
+// 	By.xpath("//p[contains(text(), 'Previous Bank Name')]")
+// 	
+     if (clickSBI.isDisplayed()) {
+         txt=clickSBI.getText();
+         return true;
+     } else {
+         
+         return false;
+
+   } 
+}
+
+private void waitForSpinnerToDisappear(WebDriver driver) {
+    By spinner = By.xpath("//div[@class='spinner-border' and @role='status']");
+
+    try {
+        // Very short wait (0.5s) just to see if spinner exists
+        WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofMillis(1000));
+        boolean appeared = shortWait.until(d -> !driver.findElements(spinner).isEmpty());
+
+        if (appeared) {
+            // If it appeared, wait max 10s for disappearance
+            new WebDriverWait(driver, Duration.ofSeconds(20)).until(ExpectedConditions.invisibilityOfElementLocated(spinner));
+        }
+    } catch (TimeoutException te) {
+    }
+}
+}

@@ -1,0 +1,26 @@
+# Environment
+baseUrl=https://kioskisd.sbiuat.bank.in/unifyapp/login/
+
+# Credentials (local testing only \u2014 don't commit secrets)#admin.username=3K580037  #admin.password=Asd@1234
+admin.username=1AKH3135
+admin.password=31350906
+
+# Browser config
+browser=chrome
+headless=false
+
+# Excel file path 
+testdata.path=C:/FIGS_Automations/FIGS_Automations/testdata/Account_Services.xlsx
+
+# Excel file path 
+Acquisitiontestdata.path=C:/FIGS_Automations/FIGS_Automations/testdata/Acquisition_Services.xlsx
+
+# Excel file path 
+AccountOpening.path=C:/FIGS_Automations/FIGS_Automations/testdata/AccountOpening.xlsx
+
+# Waits
+implicitWait=10
+
+# Screenshot & backup folders (optional)
+screenshot.path=C:/FIGS_Automations/FIGS_Automations/screenshots/
+backup.path=C:/FIGS_Automations/FIGS_Automations/backup/

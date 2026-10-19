@@ -1,0 +1,1870 @@
+package com.figs.automation.runners;
+
+import com.figs.automation.pages.FingerPrintPage;
+import com.figs.automation.utils.ConfigReader;
+
+import com.figs.automation.utils.ScreenshotUtil;
+
+import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.JOptionPane;
+
+public class CommonElements {
+
+    private final WebDriver driver;
+    private List<String> arl;   // will hold current Excel row
+
+    // ✅ Constructor
+    public CommonElements(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    /**
+     * Account Service Elements Flow
+     * @param arl : row data from Excel
+     */
+    public void AcctServiceElements(List<String> arl) throws InterruptedException {
+        this.arl = arl; // store row so helper methods can use 
+        try {
+            switch (arl.get(6)) {
+                case "BankName":
+                    selectBankName();
+                    break;
+
+                case "SelAcctNo":
+                    selectAccountno(arl.get(4));
+                    break;
+
+                case "VID":
+                    EnterVIDNumber(arl.get(4));
+                    break;
+
+                case "CIF Number":
+                    EnterCIFNumber(arl.get(4));
+                    break;
+
+                case "radio":
+                    SelectRadio(arl.get(4));
+                    break;
+
+                case "AadhaarNumber":
+                case "Remitter Aadhaar Number":
+                    EnterAadharNumber(arl.get(4));
+                    break;
+
+                case "Agent Authentication":
+                    EnterAgentPassword();
+                    break;
+
+                case "Finger":
+                	new FingerPrintPage(driver).customerFingerprintIfRequired();
+                    break; 
+                case "FingerProceed":
+                	ProceedPopUP();
+                    break;
+                case "Amount":
+                    if (!arl.get(5).equalsIgnoreCase("ReadOnly")) {
+                        EnterAmountMoneyTransfer();
+                    }
+                    break;
+
+                case "Witness Name":
+                    EnterWitnessName();
+                    break;
+
+                case "Witness Aadhaar Number":
+                	EnterWitnessAadhaarNumber(arl.get(4));
+                    break;
+                    
+                case "Beneficiary Aadhaar Number":
+                    EnterBeneficiaryAadhaarNumber(arl.get(4));
+                    break;
+
+                case "Witness Address":
+                    EnterWitnessAddress();
+                    break;
+                    
+                    
+                    
+                    
+                    /*AdharLinkDelink*/
+                    
+
+    			case "Agent Aadhaar Seeding":
+    			WebElement Menu = driver.findElement(By.xpath("(//a[@role='button' and contains(text(), 'Aadhaar Seeding') and contains(@class, 'nav-link')])[1]"));
+    			Menu.click();			
+//    			KOService_Elements.ClickSubMenuKO(Menu,"Aadhaar Seeding & Aadhaar De-Seeding");
+//    			driver.switchTo().frame("mainframe");
+    			break;
+    					
+    			case "AadhaarSeeding":
+    				ClickAadhaarSeeding();
+    			break;
+    			
+    			case "EnterAdhaarNumber":
+    				EnterAdharNumber_new(arl.get(4));
+    				break;
+    				
+    			case "Enter Account Number":
+    				EnterAccountNo();
+    				break;
+    				
+    			case "BankNameAdharSeeding":
+    				ClickBankName(arl.get(4));
+                    break;
+    			case "Aadhar Already Linked with Other Bank":
+    				DropdownYesNO(arl.get(4));
+    				break;
+    			
+    			case "ClickSubmit":
+    				//ClickOnSubmit();
+    			ValidatePROCEEDButtonIsEnabled();
+    			break;
+    			
+    			case "SuccessfulAuthorize":
+    				EnterTransactionPassword(arl.get(4));
+    				//ValidatePROCEEDButtonIsEnabled();
+    				//ClickAuthorize();
+    				break;
+    				
+    			case "ClickProceed":
+					ClickProceed();
+					break;
+    				
+    			case "AadhaarDeSeeding":
+    				ClickAadhaarDeSeeding();
+    			break;
+    				
+    			case "ClickAuthenticate":
+    				ClickAuthenticate();
+    			break;
+    			
+    			case "InvalidAdhar":
+    			EnterAadharNumber(arl.get(4));
+    			ClickAuthenticate();
+    			break;
+
+    			case "ClickReset":
+    			ClickReset();
+    			break;
+
+    			case "ValidAadhaar":
+    			ClickReset();
+    			System.out.println(arl.get(4));
+    			EnterAadharNumber(arl.get(4));
+    			ClickAuthenticate();
+    			break;
+                    
+                  
+                    
+            }
+
+            ScreenshotUtil.capture(driver, arl.get(0));
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void AcquisitionService(List<String> arl) throws InterruptedException {
+        this.arl = arl; // store row so helper methods can use 
+        try
+        {
+        	switch(arl.get(5))
+			{
+        	  /*MoneyTransfer & Loan Deposit*/
+				case "select CIF":
+					SelectRadio(arl.get(4));
+									    
+			    break;
+				case "select ACC":
+					SelectAccount();
+			    break;
+			    
+			    
+				case "Enter CIF":
+				enterCIF(arl.get(4));					    
+				break;
+			
+				case "Check CIF Validation":
+					getValidationMessageForCIF();
+					break;
+			
+
+				case "SelectAccountNumber":
+				SelectAccount();
+				
+				break;
+				
+				case "Enter Account Number":
+					//SelectAccount();
+					EnterAccountNumber_new(arl.get(4));
+					break;
+
+				case "EnterDepositorName":
+				EnterDepositerName();
+				break;
+				
+				case "EnterAdhaarNumber":
+					EnterIdentificationNumber(arl.get(4));
+					break;
+
+				case "EnterAddress":
+				EnterAddress();
+				break;
+				
+				case "EnterMobileNumber":
+					EnterMobileNumber(arl.get(4));
+					break;
+
+				case "EnterAmount":
+				EnterAmountMoneyTransfer();
+				break;
+				
+				case "ClickVerificationCode":
+					ClickVerificationCode();
+					break;
+
+				case "ProceedPopUp":
+				
+				ProceedPopUP();
+				break;
+
+				case "SuccessfulAuthorize":
+				EnterTransactionPassword(arl.get(4));
+				ValidatePROCEEDButtonPopUp();
+				break;
+
+				case "ClickConfirm":
+				ClickConfirm();
+				break;
+				
+				/*Loan Data Collection*/
+				
+				
+				case  "Customer Name":
+					EnterCustomerName();
+				break;
+					
+				case "Account Number":
+					EnterAccountNo();
+					break;
+					
+				case "ClickSearch":
+					ClickSearch();
+					break;
+					
+				case "Details":
+					ClickDetails();
+					break;
+					
+				case "Follow Up":
+					ClickFallowUP();
+					break;
+					
+				case "Date Follow Up":
+					SelectFollowDate(arl.get(4));
+					break;
+					
+				case "Contact Mode":
+					selectDropdownByValue(arl.get(4),"1");
+					break;
+					
+				case "Contacted Person":
+					selectDropdownByValue(arl.get(4),"2");
+					break;
+					
+				case "Next Date":
+					selectDate(arl.get(4));			    
+				break;
+					
+				case "Place Contacted":
+					selectDropdownByValue(arl.get(4),"3");
+					break;
+					
+				case "Disposition":
+					selectDropdownByValue(arl.get(4),"4");
+					break;
+					
+				case "SubDisposition":
+					selectDropdownByValue(arl.get(4),"5");
+					break;
+					
+				case  "FollowUpComments":
+					EnterFollowUpComments();
+				break;
+				
+				case "Collection":
+					ClickCollection();
+					break;
+				
+				case "Loan Account Number":
+					selectDropdownByAccountNumber(arl.get(4));
+				    break;
+				
+					
+//				case "ChequeIssuedDate":
+//					selectDate("20","June","2000");
+//					break;
+					
+				case "ChequeType":
+					handleDropdown(arl.get(4),"1");
+					break;
+					
+				case "Reason for Stop Payment":
+					handleDropdown(arl.get(4),"3");
+					break;
+					
+				case "Chequebook Delivery Address":
+					handleDropdown(arl.get(4),"4");
+					break;
+					
+				case "ClickProceed":
+					ClickProceed();
+					break;
+						
+				case "Finger":
+                	new FingerPrintPage(driver).customerFingerprintIfRequired();
+                    break;
+                    
+				case "TransactionStatus":
+					
+				break;
+				
+				/*SSS*/
+				
+				case "PMJJBY":
+					ClickPMJJBY();			    
+				break;
+				
+				case "PMSBY":
+					ClickPMSBY();			    
+				break;
+				
+				case "APY":
+					ClickAPY();			    
+				break;
+				
+				case "CIF":
+					ClickRadioSSS("1");			    
+				break;
+				
+				case "Account":
+					ClickRadioSSS("2");			    
+				break;
+				
+				case "DOB_ND":
+					selectDate(arl.get(4));			    
+				break;
+				
+				case "AgentAuth":
+					EnterAgentPassword();			    
+				break; 
+				
+				case "ProceedPopup":
+					ProceedPopUP();			    
+				break;
+				
+				case "FingerPrint" :
+					new FingerPrintPage(driver).customerFingerprintIfRequired();
+					break;
+					
+				case "FingerPrintProceed" :
+					new FingerPrintPage(driver).proceedFingerprintIfRequired();
+					break;
+					
+					
+					
+					/*Ease Banking*/
+					
+				case "Select Service":
+					SelectSurviceEB(arl.get(12));
+					break;
+					
+					
+				case "Select SubService":
+					SelectRadioButton(arl.get(12),"1");
+					break;
+					
+				case "Enter Selected sub Service Details":
+					enterInput(arl.get(4),arl.get(12));
+					break;
+					
+				case "ClickSubmit":
+					ValidatePROCEEDButtonIsEnabled();
+					break;
+					
+				case "Select Card":
+					SelectRadioButton(arl.get(12),"1");
+					break;
+				case "Select Card2":
+					String cardno = JOptionPane.showInputDialog("Please Enter Which number Card You want to block");
+					SelectRadioButton_2(cardno);
+					break;
+					
+				case "CustomerAuthentication":
+						 CustAuth();
+						break;
+						
+						
+						//Cheque Book Payment
+					
+				case "ChequeBookRequest":
+					ClickOnChequeBookRequest();
+					break;
+					
+				/*case  "Enter Account Number":
+					enterAccountNumber(arl.get(4));
+					break;*/
+					
+				case "PROCEED_ENABLED":
+					ValidatePROCEEDButtonIsEnabled();
+					break;
+				
+				case "NumberOfChk":
+					handleDropdown(arl.get(4),"1");
+					break;
+					
+				case "NumberOfChequeLeaves":
+					handleDropdown(arl.get(4),"2");
+					break;
+					
+			/*case "Chequebook Delivery Address":
+					handleDropdown(arl.get(4),"4");
+					break;*/
+					
+					
+					// Stop Payment Cheque
+					
+				case "StopPaymentofCheque":
+					ClickOnStopPaymentCheque();
+					break;
+
+				case "Enter Account Number stopPaymentchqk":
+					enterAccountNumber(arl.get(4));
+					break;
+					
+				case "FROMChequeNumber":
+					EnterFROMChequeNumber(arl.get(4));
+					break;
+					
+				case "TOChequeNumber":
+					EnterTOChequeNumber(arl.get(4));
+					break;
+				case "ChequeIssuedDate":
+					selectDate(arl.get(4));
+					break;
+					
+					
+//				case "ProceedPopUp":
+//					AlertMessage.handlePopupAlert();
+//					ProceedPopUP();
+//					break;
+				
+					
+					//Adhaar Seeding sub Ko
+					
+				case "Aadhaar_Seeding_SubKO":
+					ClickAadhaarSeedingsubKO();
+				break;
+				
+				case "SubKO_ID":
+					SelectRadio(arl.get(4));	   
+			    break;
+			    
+				
+			/*	case "EnterAdhaarNumber":
+					EnterAdharNumber_new(arl.get(4));
+					break;*/
+			    
+			    
+				case "PROCEED_PopUp":
+					ProceedPopUP();
+					break;
+            }
+
+            ScreenshotUtil.capture(driver, arl.get(0));
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    
+    
+    public void AccountOpening(List<String> arl) throws InterruptedException {
+        this.arl = arl; // store row so helper methods can use 
+        try
+        {
+        	switch(arl.get(5))
+			{
+        	
+			case "CustomerCreation":
+				Actions action = new Actions(driver);
+				WebElement accountOpeningLink = driver.findElement(By.xpath("//a[@data-rr-ui-event-key='link-AccOp']"));
+				action.moveToElement(accountOpeningLink).click().build().perform();	
+			break;
+        	
+			case "click eKYC":
+				ClickoneKYC();
+				break;
+			
+			case "HaveReference":
+				SelectRadio(arl.get(6));
+				break;
+				
+			case "EnterAdhaarNumber":
+				enterInput(arl.get(4),arl.get(6));
+				break;
+				
+			case "FingerPrint" :
+				new FingerPrintPage(driver).customerFingerprintIfRequired();
+				break;
+				
+			case "FingerPrintProceed" :
+				new FingerPrintPage(driver).proceedFingerprintIfRequired();
+				break;
+				
+			case "OKpopUp" :
+				OkPopUP();
+				break;
+			
+				
+				case "SelectTitle":
+					selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+				break;
+				case "SelectSpouseTitle":
+					selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+				break;
+				
+				case "SelectFORM":
+					SelectFormType(arl.get(4));
+					break;
+
+					
+
+					case "EnterCity":
+					selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+					break;
+					
+					case "EnterSubDistrict":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+					case "EnterVillage/Taluka/Town":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+					
+					case "EnterReligion":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+					case "EnterCaste":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+						
+					case "EnterMartialStatus":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+						
+					case "EnterEducationQualification":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+					case "EnterFather/Mother/Guardian":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+					case "NoOfDependents":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+					case "OccupationType":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+					case "OccupationSubType":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+						
+					case "AnyExistingSBIUser":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+						
+					case "SourceOfFund":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+						
+					case "PAN_Applied":
+						SelectRadioButton(arl.get(6),"1");
+						break;
+					case "ATMCardRequired":
+						SelectRadioButton(arl.get(6),"2");
+						break;
+					case "SelectOccupation":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+						
+					case "NomineRealtionType":
+						selectReactDropdownByTextLabel(arl.get(6),arl.get(4));
+						break;
+					case "NomineeDOB":
+						selectDate(arl.get(4));
+						break;
+					case "NomineeNameOnPassbook":
+						SelectRadioButton(arl.get(6),"3");
+						break;
+					case "LinkwithSHG":
+						SelectRadioButton(arl.get(6),"4");
+						break;
+						
+					case "SaveFormasPDF":
+						automatePrint("Account.pdf");
+						break;
+				
+				
+            }
+
+            ScreenshotUtil.capture(driver, arl.get(0));
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }    
+    
+    /**
+     * Acquisiton Service Elements Flow
+     * @param arl : row data from Excel
+     */ 
+    
+    /*methods for case validations*/
+    
+    public void automatePrint(String filename) throws AWTException, InterruptedException
+	 {
+	        Robot robot = new Robot();
+	        Thread.sleep(3000); // wait for print dialog to open
+
+	        // Step 1: Confirm Print (ENTER)
+	        robot.keyPress(KeyEvent.VK_ENTER);
+	        robot.keyRelease(KeyEvent.VK_ENTER);
+
+	        Thread.sleep(2000); // wait for "Save As" dialog
+
+	        // Step 2: Type filename
+	        for (char c : filename.toCharArray()) {
+	            int keyCode = KeyEvent.getExtendedKeyCodeForChar(c);
+	            robot.keyPress(keyCode);
+	            robot.keyRelease(keyCode);
+	            Thread.sleep(100);
+	        }
+
+	        // Step 3: Press ENTER to Save
+	        robot.keyPress(KeyEvent.VK_ENTER);
+	        robot.keyRelease(KeyEvent.VK_ENTER);
+
+	    }
+    
+    public void ClickoneKYC() {
+		
+			Actions action = new Actions(driver);
+			WebElement ekyc=driver.findElement(By.xpath("//a[@data-rr-ui-event-key='link-EKYC']"));
+			action.moveToElement(ekyc).click().build().perform();	
+	}
+    
+    public void SelectFormType(String FormType)
+	{
+		try
+		{
+			SelectRadio(FormType);
+			if(arl.get(4).equals("Form 60"))
+			{
+				
+				System.out.println(" user select Form 60 service");
+				//ValidatePROCEED_CONFIRMButtonIsEnabled();
+				ValidateProceedButtonMoneyTransfer();
+			}
+			else
+			{
+				String pan="BDNPC6168M";
+				enterInput(pan,arl.get(6));
+				clickVerify();
+				WebElement pannotverified = driver.findElement(By.xpath("//div[@role='dialog']//div[@class='row']//p[1]"));
+				if(pannotverified.isDisplayed())
+				{
+					OkPopUP();
+					JOptionPane.showMessageDialog(null, "Please validate the PAN or Continue with Form 60");
+					SelectRadio("Form 60");
+					ValidateProceedButtonMoneyTransfer();
+				}
+				
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+    
+    
+    
+    
+    public void selectReactDropdownByTextLabel(String index, String valueToSelect) {
+	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	    try {
+	        // Find the p tag with text containing the label
+	    	
+	        String xpath = "(//input[contains(@id, 'react-select') and @type='text'])["+index+"]";
+	        
+	        WebElement dropdownInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+
+	        // Scroll and click
+	        if(!dropdownInput.isDisplayed()) {
+	       ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", dropdownInput);
+	       ((JavascriptExecutor) driver).executeScript("arguments[0].click();", dropdownInput);
+	        }
+	       // dropdownInput.click();
+
+	        // Type and select
+	        dropdownInput.sendKeys(Keys.CONTROL + "a"); // optionally use CONTROL+A + DELETE if needed
+	        dropdownInput.sendKeys(Keys.DELETE);
+	        Thread.sleep(1000);
+	        dropdownInput.sendKeys(valueToSelect);
+	        
+	        dropdownInput.sendKeys(Keys.ENTER);
+
+	        System.out.println("✅ Selected '" + valueToSelect + "' from dropdown ");
+	    } catch (Exception e) {
+	    	e.printStackTrace();
+	    }
+	}
+    
+
+    public void clickVerify() {
+	    try {
+	    	
+	    	WebElement verifyhere = driver.findElement(By.xpath("//img[@alt='Veifyhere']"));
+	    	verifyhere.click();
+	    } catch (Exception e) {
+	        System.out.println( e.getMessage());
+	    }
+	}
+    
+    public void OkPopUP() {
+	    try {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+	        WebElement okButton = wait.until(ExpectedConditions.visibilityOfElementLocated(
+	            By.xpath("//button[.//p[contains(text(), 'OK')]]")));
+
+	        if (okButton.isDisplayed()) {
+	            okButton.click();
+	        }
+	    } catch (Exception e) {}
+	}   
+    
+    
+public boolean ValidateProceedButtonMoneyTransfer() {
+		
+		// Check for screen-level proceed button
+		try{
+			WebElement validBtn = driver.findElement(By.xpath("//p[normalize-space()='Proceed']"));
+			 ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", validBtn);
+		 boolean isenabled = validBtn.isEnabled();
+			if (isenabled) {
+				((JavascriptExecutor) driver).executeScript("arguments[0].click();", validBtn);
+				
+				return true;		
+		}
+		}catch(Exception e)
+		{}	
+		return false;
+}
+    
+    /*select from calender icon 
+     * Arindam Harh
+     */
+    public  void selectDate(String Date) throws InterruptedException {
+ 	   
+		try {
+				// value from Excel
+				String[] parts = Date.split("/");
+				String day = parts[0];
+				String month = parts[1];
+				String year = parts[2];	
+	    WebElement calendarIcon = driver.findElement(By.xpath("//button[contains(@aria-label,'Choose date')]"));
+	    calendarIcon.click();
+	    Thread.sleep(1000); // wait for the calendar to appear
+
+	   
+	    WebElement monthYearLabel = driver.findElement(By.xpath("//div[contains(@class,'MuiPickersCalendarHeader-labelContainer')]"));
+	    monthYearLabel.click();
+	    Thread.sleep(1000);
+
+	    WebElement targetYear = driver.findElement(By.xpath("//button[@type='button' and text()='"+year+"']"));
+	   // ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", targetYear);
+	    targetYear.click();
+	    Thread.sleep(1000);
+
+	    WebElement previousMontharrow = driver.findElement(By.xpath("//button[@aria-label='Previous month']"));
+	   
+	   String monthYear= month+" "+year;
+	for(int i=0;i<11;i++)
+	{
+		 WebElement yearMonth= driver.findElement(By.xpath("(//div[contains(@class,'MuiPickersCalendarHeader-label')])[2]"));
+		if(!yearMonth.getText().equals(monthYear))
+		{
+			previousMontharrow.click();
+		}
+	}
+	    
+	    WebElement targetDay = driver.findElement(By.xpath("//button[@role='gridcell' and normalize-space()='" + day + "']"));
+	    targetDay.click();
+		}
+	    catch(Exception e)
+		{
+	    	e.getStackTrace();
+		}
+	}
+    
+	
+	
+	public  void ClickPMJJBY()
+	{
+		try {
+		WebElement pmjjby = driver.findElement(By.xpath("//a[normalize-space()='PMJJBY']"));
+		pmjjby.click();
+		}
+		catch (Exception e) {
+			e.getMessage();
+		}
+	}
+	
+	public void ClickPMSBY()
+	{
+		try {
+		WebElement pmjjby = driver.findElement(By.xpath("//a[normalize-space()='PMSBY']"));
+		pmjjby.click();
+		}
+		catch (Exception e) {
+			e.getMessage();
+		}
+	}
+	
+	public  void ClickAPY()
+	{
+		try {
+		WebElement pmjjby = driver.findElement(By.xpath("//a[normalize-space()='APY']"));
+		pmjjby.click();
+		}
+		catch (Exception e) {
+			e.getMessage();
+		}
+	}
+	
+	public  void ClickRadioSSS(String index)
+	{
+		try {
+		WebElement radio = driver.findElement(By.xpath("(//button[@style[contains(.,'width: 25px')]][div or not(div)])["+index+"]"));
+		radio.click();
+		}
+		catch (Exception e) {
+			e.getMessage();
+		}
+	}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /* select Bank name (Lingaraj Desai, 06/06/2025) */
+    public void selectBankName() {
+        try {
+            WebElement name = driver.findElement(By.cssSelector(".css-dutxbk-control"));
+            name.click();
+
+            Thread.sleep(500);
+            WebElement input = driver.findElement(By.cssSelector("div.css-19bb58m input"));
+            input.sendKeys(arl.get(4));
+            input.sendKeys(Keys.ENTER);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* select Account number  (Lingaraj Desai, 06/06/2025) */ 
+    public void selectAccountno(String acctNo) {
+        try {
+        	// Wait for spinner to disappear
+            waitForSpinnerToDisappear(driver);
+            WebElement accountDropdown = driver.findElement(By.xpath("//select[@style]"));
+            Select select = new Select(accountDropdown);
+            select.selectByValue(acctNo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Enter VID Number (Lingaraj Desai, 06/06/2025) */
+    public void EnterVIDNumber(String VID) {
+        try {
+            WebElement VIDCheckbox = driver.findElement(By.xpath("//input[@id='flexSwitchCheckDefault']"));
+            VIDCheckbox.click();
+            WebElement VIDInput = driver.findElement(By.xpath("//input[@placeholder='Enter VID Number']"));
+            VIDInput.clear();
+            VIDInput.sendKeys(VID);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Enter CIF number (Lingaraj Desai, 06/06/2025) */
+    public void EnterCIFNumber(String CIF) {
+        try {
+        	 
+            WebElement EnterCIF = driver.findElement(By.xpath("//input[@placeholder='Enter CIF Number']"));
+            EnterCIF.clear();
+            EnterCIF.sendKeys(CIF);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Select radio  (Lingaraj Desai, 06/06/2025) */
+    public void SelectRadio(String Radio) {
+        try {
+            WebElement Radiobutton = driver.findElement(By.cssSelector("input[value='" + Radio + "']"));
+            if (!Radiobutton.isSelected()) {
+                Radiobutton.click();
+            }
+            Thread.sleep(200);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Enter Aadhaar Number  (Lingaraj Desai, 06/06/2025) */
+    public void EnterAadharNumber(String aadhar) {
+        try {
+            try {
+                WebElement VIDCheckbox = driver.findElement(By.xpath("//input[@id='flexSwitchCheckDefault']"));
+                VIDCheckbox.click();
+                Thread.sleep(100);
+                VIDCheckbox.click();
+                Thread.sleep(100);
+            } catch (Exception ignored) {
+            }
+
+            WebElement aadhaarInput = driver.findElement(By.xpath(
+                    "//input[@placeholder='Enter Identification Number' or @placeholder='Enter Aadhaar Number' or @placeholder='Enter Remitter Aadhar Number']"));
+            aadhaarInput.clear();
+            aadhaarInput.sendKeys(aadhar);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Enter Agent password  (Lingaraj Desai, 06/06/2025) */
+    public void EnterAgentPassword() {
+        try {
+            WebElement passwordInput = driver.findElement(By.xpath(
+                    "//label[text()='Agent Transaction Password']/following::input[@id='outlined-basic']"));
+            passwordInput.sendKeys(ConfigReader.get("admin.password"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Enter Amount  (Lingaraj Desai, 06/06/2025) */
+    public void EnterAmountMoneyTransfer() {
+        try {
+            WebElement Amount = driver.findElement(By.xpath("//input[@placeholder='Enter Amount']"));
+            Amount.sendKeys(arl.get(4));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Enter Witness Name  (Lingaraj Desai, 06/06/2025) */
+    public void EnterWitnessName() {
+        try {
+            WebElement WitnessName = driver.findElement(By.xpath("//input[@placeholder='Enter Witness Name']"));
+            WitnessName.clear();
+            WitnessName.sendKeys(arl.get(4));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Enter Witness Aadhaar Number  (Lingaraj Desai, 06/06/2025) */
+    public void EnterWitnessAadhaarNumber(String aadhar) {
+        try {
+            WebElement WitnessName = driver.findElement(By.xpath("//span[contains(text(),'Witness Aadhaar Number')]/ancestor::div[contains(@class,'MuiFormControl-root')]//input[@maxlength='12']"));
+            WitnessName.clear();
+            WitnessName.sendKeys(aadhar);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /* Enter Beneficiary Aadhaar Number  (Lingaraj Desai, 06/06/2025) */
+    public void EnterBeneficiaryAadhaarNumber(String aadhar) {
+        try {
+            WebElement WitnessName = driver.findElement(By.xpath("//label[contains(., 'Beneficiary Aadhaar Number')]/following::input[1]"));
+            WitnessName.clear();
+            WitnessName.sendKeys(aadhar);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* Enter Witness Address  (Lingaraj Desai, 06/06/2025) */
+    public void EnterWitnessAddress() {
+        try {
+            WebElement WitnessName = driver.findElement(By.xpath("//input[@placeholder='Enter Witness Address']"));
+            WitnessName.sendKeys(arl.get(4));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    public  void SelectAccount() {
+        try {
+            
+            WebElement accountRadio = driver.findElement(
+                By.xpath("//input[@type='radio' and @value='Account Number']")
+            );
+            accountRadio.click(); 
+            Thread.sleep(500);
+
+        } catch (Exception e) {
+           
+        	System.out.println("No Radio Buton for Account in This Service");
+        }
+    }
+    
+    public  void enterCIF(String cust) {
+	    try {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+	        // Step 1: Click the "CIF" radio button
+	        WebElement cifRadio = wait.until(ExpectedConditions.elementToBeClickable(
+	            By.xpath("//label[contains(text(),'CIF')]/preceding-sibling::input[@type='radio']")));
+	        cifRadio.click();
+
+	        // Step 2: Enter CIF number into the input field
+	        WebElement cifInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
+	            By.id("outlined-basic")));
+
+	        // Robust clear method (works for JS-heavy input fields)
+	        cifInput.sendKeys(Keys.CONTROL + "a");
+	        cifInput.sendKeys(Keys.DELETE);
+
+	        // Step 3: Enter the new value
+	        cifInput.sendKeys(cust);
+
+	    } catch (Exception e) {
+	        System.out.println("Error in enterCIF: " + e.getMessage());
+	    }
+	}
+	
+    public   boolean getValidationMessageForCIF() {
+        // Common XPath that matches any <p> error message inside the CIF section
+        WebElement validationMsg = driver.findElement(By.xpath("//p[contains(@style, 'color: red')]"));
+        boolean str=validationMsg.isDisplayed();
+        
+        if(str)
+        {
+        	
+        	return true;
+        }
+        else
+        	return false;
+   	 
+    } 
+
+    public void enterAccountNumber(String cust) {
+	    try {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+	        // Step 1: Click the "CIF" radio button
+	        WebElement accRadio = wait.until(ExpectedConditions.elementToBeClickable(
+//	            By.xpath("//input[@type='radio' and @id='Account Number']")));
+	        By.xpath("//input[contains(@class, 'MuiOutlinedInput-input') or @placeholder='Enter Account number']")));
+	      
+	       accRadio.click();
+
+	        // Step 2: Enter CIF number into the input field
+	        WebElement accInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
+	            By.id("outlined-basic")));
+
+	        // Robust clear method (works for JS-heavy input fields)
+	        accInput.sendKeys(Keys.CONTROL + "a");
+	        accInput.sendKeys(Keys.DELETE);
+
+	        // Step 3: Enter the new value
+	        accInput.sendKeys(cust);
+
+	    } catch (Exception e) {
+	        System.out.println("Error in enterCIF: " + e.getMessage());
+	    }
+	}
+	
+	
+
+	public  void EnterAccountNumber_new(String accountNumber) {
+	  
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	        WebElement accountInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
+	            By.xpath("//input[@placeholder='Enter Account number']")));
+	        accountInput.sendKeys(accountNumber);
+	    
+	}
+	
+	public  void EnterDepositerName()
+	{
+		
+			WebElement DepositerName = driver.findElement(By.xpath("//input[@placeholder='Enter Depositor Name']"));
+			DepositerName.sendKeys(arl.get(4));
+		
+	}
+
+	public  void EnterIdentificationNumber(String aadhar)
+	{
+	 	 WebElement aadhaarInput = driver.findElement(By.xpath("//input[@placeholder='Enter Identification Number' or @placeholder='Enter Aadhaar Number']"));
+		        aadhaarInput.clear();  
+		        aadhaarInput.sendKeys(aadhar); 
+	}
+	
+	public void EnterAddress()
+	{
+			WebElement Address =  driver.findElement(By.xpath("//input[@placeholder='Enter Depositor Address']"));
+			Address.sendKeys(arl.get(4));
+		
+	}
+	
+	public void EnterMobileNumber(String Mobile)
+	{
+	
+			WebElement MobileNumber = driver.findElement(By.xpath("//input[@placeholder='Enter Mobile Number']\r\n"));
+			MobileNumber.sendKeys(Mobile);
+	}
+
+	public void ClickVerificationCode() {
+	    try {
+	        // Click "Send Verification Code"
+	        WebElement sendCode = driver.findElement(By.xpath("//p[normalize-space()='Send Verification Code']"));
+	        sendCode.click();
+	        System.out.println("Clicked Send Verification Code");
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+	        // Wait for OTP popup to show up
+	        Thread.sleep(3000); // Wait 3 seconds for popup to appear
+
+	        // Check OTP fields (assuming 6 fields appear)
+	        List<WebElement> otpFields = driver.findElements(
+	            By.xpath("//input[@type='password' and @inputmode='numeric' and @maxlength='1']"));
+	        if (otpFields.size() == 6) {
+	            System.out.println("OTP fields are visible.");
+	        } else {
+	            System.out.println("OTP fields not found.");
+	            return;
+	        }
+
+	        // Wait for user to enter OTP manually
+	        System.out.println("Please enter OTP manually...");
+	        //Thread.sleep(15000); // Wait 15 seconds for user input
+
+	        
+	        WebElement proceedBtn = wait.until(ExpectedConditions.elementToBeClickable(
+	                By.xpath("//div[@class='modal-content']//button[@class='proceedbutton' and not(@disabled)]")
+	            ));
+	        proceedBtn.click();
+	        System.out.println("Clicked PROCEED after OTP entry.");
+
+	    } catch (Exception e) {
+	        System.out.println("Something went wrong:");
+	        e.printStackTrace();
+	    }
+	}
+
+	
+	public void ProceedPopUP() {
+	    try {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+	        Thread.sleep(500);
+	        WebElement proceedButton = wait.until(ExpectedConditions.visibilityOfElementLocated(
+	            By.xpath("//div[@class='modal-content']//button[@class='proceedbutton' and not(@disabled)]")));
+	        if (proceedButton.isDisplayed()) {
+	            
+	            proceedButton.click();
+	        }
+	    } catch (Exception e) {}
+
+	}
+	
+	public  void EnterTransactionPassword(String Password)
+	{
+		
+			WebElement password = driver.findElement(By.xpath("//label[text()='Agent Transaction Password']/following::input[@id='outlined-basic']"));
+			//password.sendKeys(Password);
+			password.sendKeys(ConfigReader.get("admin.password"));
+	
+	}
+	
+	public void ClickConfirm()
+	{
+		
+			WebElement Confirm = driver.findElement(By.xpath("//button[.//p[contains(., 'PROCEED')]]"));
+			//p[contains(., 'PROCEED') and .//img[contains(@src, 'Arrow')]]
+
+			if(Confirm.isDisplayed())
+			{
+				Confirm.click();
+			}
+		
+	}
+	
+	public  boolean ValidatePROCEEDButtonPopUp() {
+		try {
+		WebElement popupButton = driver.findElement(By.xpath("//div[@role='dialog']//button[.//p[normalize-space()='PROCEED']]"));
+
+		    // If popup button exists and is interactable
+		boolean Button = popupButton.isDisplayed();
+		        if (Button) {
+		            
+		            popupButton.click();
+		         //  OkPopUP();    //use when ok msg pop comes
+		            return true;
+		        }
+		        else
+	    return false;
+		}catch(Exception e) {return false;}
+	}
+   
+	
+	
+	/* Ease Banking Methhod*/
+	public void SelectSurviceEB(String str)
+	{
+		try
+		{
+			//a[@role='button' and text()='']
+
+			WebElement easebankingService = driver.findElement(By.xpath("//a[@role='button' and text()='"+str+"']"));
+			easebankingService.click();
+			Thread.sleep(500);
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public void SelectRadioButton(String Radio,String index)
+	{ 
+			 // Build dynamic XPath based on label text
+			WebElement Radiobutton = driver.findElement(By.xpath("(//input[@type='radio' and @value='"+Radio+"'])["+index+"]"));
+			Radiobutton.click();
+			// Click if not already selected
+	        if (!Radiobutton.isSelected())
+	        {
+	        	Radiobutton.click();
+	        }
+	}
+	
+	public void SelectRadioButton_2(String Radio)
+	{
+		    
+			 // Build dynamic XPath based on label text
+			WebElement Radiobutton = driver.findElement(By.xpath("(//input[@type='radio' and @name='atmcard'])["+Radio+"]"));
+			Radiobutton.click();
+			
+			// Click if not already selected
+	        if (!Radiobutton.isSelected()) {
+	        	Radiobutton.click();;
+	        }	
+	}
+	
+	
+	public void enterInput(String value,String placeholder ) {
+	    try {
+	    	WebElement inputField = driver.findElement(By.xpath("//input[@placeholder='"+placeholder+"']"));
+	    	inputField.click();
+	      
+	    	 inputField.sendKeys(Keys.CONTROL + "a");
+	    	 inputField.sendKeys(Keys.DELETE);
+
+	      	        // Step 3: Enter the new value
+	    	 inputField.sendKeys(value);
+	    } catch (Exception e) {
+	        System.out.println("Error in enterCIF: " + e.getMessage());
+	    }
+	}
+	
+	public boolean ValidatePROCEEDButtonIsEnabled() 
+	{
+		
+		// Check for screen-level proceed button
+		try{
+			WebElement proceedBtn = driver.findElement(By.xpath("(//p[contains(translate(normalize-space(string()), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'PROCEED')])[1]"));
+			((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", proceedBtn);
+			boolean isenabled = proceedBtn.isEnabled();
+			if (isenabled) {
+				//proceedBtn.click();
+				       
+				       ((JavascriptExecutor) driver).executeScript("arguments[0].click();", proceedBtn);
+				return true;		
+		}
+		}catch(Exception e)
+		{}	
+		return false;
+}
+    
+	
+	public  void CustAuth() throws InterruptedException
+	{
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10)); 
+
+		boolean isVisible = false;
+		
+		while (!isVisible) {
+			JOptionPane.showMessageDialog(null, "Please complete fingerprint authentication.");
+		    try {
+		    	
+		    	if(ValidatePROCEEDButtonPopUp());
+		    	else {
+		    		try{
+		    	WebElement retry = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//p[normalize-space(text())='Retry']")));
+		    	if(retry.isDisplayed())
+		    	{
+		    		retry.click();
+		    	}
+		    		}catch(Exception e) {
+		        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//p[text()='ATM Card Block']")));
+		        isVisible = element.isDisplayed();
+		        System.out.println("Element is now visible!");
+		        break;
+		    		}
+		    } }catch (Exception e) {
+		        System.out.println("Element not visible yet, retrying...");
+		        break;
+		        //Thread.sleep(1000); // Add delay to avoid tight loop (optional but recommended)
+		    
+		}
+		}
+		// You can safely use the element now
+		//System.out.println("Element is now visible!");
+		
+	}
+	 
+
+
+	 public void handleDropdown(String valueToSelect ,String index) {
+		 
+		 try {
+			 
+			 	// Locate the dropdown
+			 WebElement dropdownElement = driver.findElement(By.xpath("(//select[@class='select-dropdown'])[" + index + "]"));
+
+		        // Create Select object
+		        Select dropdown = new Select(dropdownElement);
+
+		        // Select by visible text
+		        dropdown.selectByVisibleText(valueToSelect);
+		        
+		}
+		 catch (Exception e) 
+		 {
+			e.printStackTrace();
+		}
+		
+	 }
+	/*
+	 * Click on Cheque Book Request
+	 * Nitin 
+	 */
+	public void ClickOnChequeBookRequest()
+	{
+		try
+		{
+			WebElement Confirm = driver.findElement(By.xpath("//p[contains(text(),'Cheque Book Request')] | //a[contains(text(),'Cheque Book Request')]"));
+			if(Confirm.isDisplayed())
+			{
+				Confirm.click();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 * Click on  Stop Payment Cheque
+	 * Nitin 
+	 */
+	public void ClickOnStopPaymentCheque()
+	{
+		try
+		{
+			WebElement Confirm = driver.findElement(By.xpath("//a[contains(text(), 'Stop Payment of Cheque')]"));
+			if(Confirm.isDisplayed())
+			{
+				Confirm.click();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+
+	/*
+	 *Enter Customer Name for LAMS   
+	 *26/08/25
+	 *Nitin
+	 */
+	
+	public void EnterCustomerName()
+	{
+		try
+		{
+			WebElement Account =  driver.findElement(By.xpath("//input[@placeholder='Enter Customer Name']"));
+			Account.sendKeys(arl.get(4));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+
+	/*
+	 *Enter EnterFollowUp Comments for LAMS   
+	 *28/08/25
+	 *Nitin
+	 */
+	
+	public void EnterFollowUpComments()
+	{
+		try
+		{
+			WebElement Account =  driver.findElement(By.xpath("//textarea[@id='outlined-disabled' and @placeholder='Enter Follow Up Comments']"));
+			Account.sendKeys(arl.get(4));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	/*
+	 *Enter Amount for LAMS
+	 *26/08/25
+	 *Nitin
+	 */
+	
+	public void EnterAccountNo()
+	{
+		try
+		{
+			WebElement Account =  driver.findElement(By.xpath("//input[contains(@class, 'MuiInputBase-input') and @maxlength='11']"));
+			Account.sendKeys(arl.get(4));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+//	public void EnterAccountNo()
+//	{
+//			WebElement Account =  driver.findElement(By.xpath("//input[contains(@class, 'MuiInputBase-input') and @maxlength='11']"));
+//			Account.sendKeys(arl.get(4));
+//	}
+		
+	/*
+	 * 
+	 *Click Search button
+	 *26/08/2025
+	 *Nitin
+	 */
+	public void ClickSearch() throws InterruptedException
+	{
+		try
+		{
+			WebElement SearchButton = driver.findElement(By.xpath("(//p[contains(normalize-space(.), 'Search')])[2]"));
+			SearchButton.click();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 *Click Details button
+	 *26/08/2025
+	 *Nitin
+	 */
+	public void ClickDetails() throws InterruptedException
+	{
+		try
+		{
+			Thread.sleep(5000);
+			WebElement DetailsButton = driver.findElement(By.xpath("(//div[text()='Details'])[1]"));
+			Thread.sleep(4000);
+			DetailsButton.click();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 *Click Fallow UP button  
+	 *28/08/2025
+	 *Nitin
+	 */
+	public void ClickFallowUP() throws InterruptedException
+	{
+		try
+		{
+			WebElement DetailsButton = driver.findElement(By.xpath("(//p[contains(text(),'Follow Up')])[2]"));
+			DetailsButton.click();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 *Click Fallow UP button  
+	 *28/08/2025
+	 *Nitin
+	 */
+	public void SelectFollowDate(String Date) throws InterruptedException {
+	    // 👉 Example input: "9/10/2025 01:10 AM"
+	    String[] parts = Date.split(" ");
+	    String dateStr = parts[0].trim();      // "9/10/2025"
+	    String timeStr = parts[1].trim();      // "01:10"
+	    String meridiem = parts[2].trim();     // "AM"
+
+	    // --- Parse Date ---
+	    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("d/M/yyyy");
+	    java.util.Date parsedDate = null;
+	    try {
+	        parsedDate = sdf.parse(dateStr);
+	    } catch (Exception e) {
+	        System.out.println("❌ Date parse error: " + e.getMessage());
+	        return;
+	    }
+
+	    java.text.SimpleDateFormat dayFmt = new java.text.SimpleDateFormat("d");
+	    java.text.SimpleDateFormat monthYearFmt = new java.text.SimpleDateFormat("MMMM yyyy");
+
+	    String day = dayFmt.format(parsedDate);                   // "9"
+	    String monthYear = monthYearFmt.format(parsedDate);       // "October 2025"
+
+	    // --- Split Time ---
+	    String[] timeParts = timeStr.split(":");
+	    String hour = String.format("%02d", Integer.parseInt(timeParts[0])); // "01"
+	    String minute = String.format("%02d", Integer.parseInt(timeParts[1])); // "10"
+
+	    WebDriverWait wait = new WebDriverWait(driver, java.time.Duration.ofSeconds(15));
+
+	    // 1️⃣ Click the DateTime picker input (change selector as needed)
+	    WebElement dateTimeInput = driver.findElement(By.xpath("(//button//*[name()='svg' and @data-testid='CalendarIcon'])[1]"));
+	    dateTimeInput.click();
+	    Thread.sleep(500);
+
+	    // 2️⃣ Navigate to correct Month & Year
+	    String headerXpath = "//div[contains(@class,'MuiPickersCalendarHeader-label')]";
+	    wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(headerXpath)));
+
+	    while (true) {
+	        WebElement header = driver.findElement(By.xpath(headerXpath));
+	        String currentHeader = header.getText().trim();
+	        if (currentHeader.equalsIgnoreCase(monthYear)) {
+	            break;
+	        } else {
+	            // 👇 Adjust button direction if needed (Next/Previous)
+	            WebElement prevBtn = driver.findElement(By.xpath("//button[@title='Previous month']"));
+	            prevBtn.click();
+	            Thread.sleep(400);
+	        }
+	    }
+
+	    // 3️⃣ Click the Day
+	    String dayXpath = String.format("//button[@role='gridcell' and normalize-space(text())='%s']", day);
+	    wait.until(ExpectedConditions.elementToBeClickable(By.xpath(dayXpath))).click();
+
+	    // 4️⃣ Select Hour
+	    String hourXpath = String.format("//ul[@aria-label='Select hours']//li[normalize-space(text())='%s']", hour);
+	    wait.until(ExpectedConditions.elementToBeClickable(By.xpath(hourXpath))).click();
+
+	    // 5️⃣ Select Minute
+	    String minuteXpath = String.format("//ul[@aria-label='Select minutes']//li[normalize-space(text())='%s']", minute);
+	    wait.until(ExpectedConditions.elementToBeClickable(By.xpath(minuteXpath))).click();
+
+	    // 6️⃣ Select AM/PM
+	    String meridiemXpath = String.format("//ul[@aria-label='Select meridiem']//li[normalize-space(text())='%s']", meridiem.toUpperCase());
+	    wait.until(ExpectedConditions.elementToBeClickable(By.xpath(meridiemXpath))).click();
+
+	    // 7️⃣ Click OK button
+	    WebElement okButton = driver.findElement(By.xpath("//button[normalize-space()='OK']"));
+	    okButton.click();
+
+	    Thread.sleep(1000);
+	}
+
+	
+	
+	/*
+	 *Click Fallow UP button  
+	 *28/08/2025
+	 *Nitin
+	 */
+	public void ClickCollection() throws InterruptedException
+	{
+		try
+		{
+			WebElement DetailsButton = driver.findElement(By.xpath("//p[contains(text(),'Collection')]"));
+			DetailsButton.click();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	  public void selectDropdownByValue(String valueToSelect,String indx) {
+		
+		  WebElement dropdownElement= driver.findElement(By.xpath("(//select[@style='width: 100%; height: 56px; background-color: white; padding: 8px;'])["+indx+"]"));
+	        Select select = new Select(dropdownElement);
+	        select.selectByVisibleText(valueToSelect);  // Match option text like "Call", "Visit", "Walk-in"
+	    }
+
+	  
+	  public void selectDropdownByAccountNumber(String valueToSelect) {
+			
+		  WebElement dropdownElement= driver.findElement(By.xpath("//select[@style='width: 100%; height: 56px; background-color: white; padding: 8px; cursor: pointer;']"));
+	        Select select = new Select(dropdownElement);
+	        select.selectByVisibleText(valueToSelect);  
+	    }
+	  
+	
+	
+	
+	  public boolean ClickProceed() {
+			
+			// Check for screen-level proceed button
+			WebElement proceedBtn = driver.findElement(By.xpath("(//button[contains(@class, 'proceedbutton') and .//p[contains(text(),'PROCEED') or img]])[2]"));
+			 boolean isenabled = proceedBtn.isEnabled();
+				if (isenabled) {
+					proceedBtn.click();
+					return true;		
+			}
+	    return false;
+	}
+	  
+	
+	
+	
+	/*stop payment cheque*/
+	
+	
+	  public void EnterFROMChequeNumber(String ChequeNumber)
+		{
+			try
+			{
+				WebElement BankName = driver.findElement(By.xpath("(//input[@type='text' and @maxlength='11'])[1]"));
+				BankName.sendKeys(ChequeNumber);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		/*
+		 *Select TO Cheque Number
+		 *11/08/25
+		 *Nitin
+		 */
+		
+		public void EnterTOChequeNumber(String ChequeNumber)
+		{
+			try
+			{
+				WebElement BankName = driver.findElement(By.xpath("(//input[@type='text' and @maxlength='11'])[2]"));
+				BankName.sendKeys(ChequeNumber);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}	
+	
+	
+	
+	
+		/*
+		 * Adhaar seedeing sub KO
+		 */
+		
+		public void ClickAadhaarSeedingsubKO()
+		{
+			try
+			{
+				WebElement aadhaarSeeding = driver.findElement(By.xpath("//a[contains(text(), 'Aadhaar Seeding SubKO')]"));
+				aadhaarSeeding.click();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+	
+
+	
+	/*Adhaar seeding-deseeding*/
+		
+	/*
+	 *Click AadhaarSeeding button
+	 *23/07/2025
+	 *Nitin
+	 */
+	
+	public void ClickAadhaarSeeding()
+	{
+			WebElement aadhaarSeeding = driver.findElement(By.xpath("//p[@class='CardLabel' and contains(normalize-space(), 'Aadhaar Seeding')]"));
+			aadhaarSeeding.click();
+		
+	}	
+	public  void ClickAuthenticate()
+	{
+			WebElement AuthenticateButton = driver.findElement(By.cssSelector("//p[@class='CardLabel' and contains(normalize-space(), 'Aadhaar Seeding')]"));
+			AuthenticateButton.click();
+	}
+	public void EnterAdharNumber_new(String aadhar)
+	{
+		
+			 WebElement aadhaarInput = driver.findElement(By.xpath("//input[@placeholder='Enter Identification Number' or @placeholder='Enter Aadhaar Number']"));
+		        aadhaarInput.clear();  
+		        aadhaarInput.sendKeys(aadhar); 
+		    
+	}
+	
+	
+	/*public  void ClickBankName(String valueToSelect)
+	{
+		// 1. Find the input inside the custom dropdown and send keys
+	        WebElement inputField = driver.findElement(By.xpath("(//div[@class='css-19bb58m'])[2]"));
+	        inputField.click();
+	        inputField.sendKeys(valueToSelect);
+	        inputField.sendKeys(Keys.ENTER);  // Press Enter to select the matched option
+		
+	}*/
+	
+	
+	
+	public void ClickBankName(String valueToSelect) {
+	    // 1. Locate the actual input field by its ID or role
+	    WebElement inputField = driver.findElement(By.xpath("//input[@id='react-select-4-input']"));
+
+	    // 2. Click the input to activate the dropdown
+	    inputField.click();
+	    
+	    // 3. Type the desired value
+	    inputField.sendKeys(valueToSelect);
+
+	    // 4. Wait until the dropdown option with the text appears
+	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+	    WebElement optionToSelect = wait.until(ExpectedConditions.visibilityOfElementLocated(
+	        By.xpath("//div[contains(@class,'option') and text()='" + valueToSelect + "']")
+	    ));
+
+	    // 5. Click the option
+	    optionToSelect.click();
+	}
+
+	
+	
+	public void ClickReset()
+	{
+			WebElement ResetButton = driver.findElement(By.cssSelector("input[value = 'Reset']"));
+			ResetButton.click();
+		
+	}
+	
+	public void DropdownYesNO(String Value) throws InterruptedException
+	{
+	        WebElement dropdown = driver.findElement(By.cssSelector(".css-dnltqu-control"));
+	        dropdown.click();
+
+	        // Short delay to allow dropdown to open
+	        Thread.sleep(3000);
+
+	        // Use keyboard navigation to select Yes/No
+	        Actions actions = new Actions(driver);
+	        if (Value.equalsIgnoreCase("Yes")) {
+	            actions.sendKeys(Keys.ENTER).perform();  // Usually first item
+	        } else if (Value.equalsIgnoreCase("No")) {
+	            actions.sendKeys(Keys.ARROW_DOWN).perform();
+	            Thread.sleep(300);
+	            actions.sendKeys(Keys.ENTER).perform(); // Second item
+	        }
+	      //  actions.sendKeys(Keys.TAB).perform();
+	}
+	
+	
+	public  void ClickAadhaarDeSeeding()
+	{
+			WebElement aadhaarSeeding = driver.findElement(By.xpath("//p[@class='CardLabel' and contains(normalize-space(), 'Aadhaar De-Seeding')]"));
+			aadhaarSeeding.click();
+	}
+	
+	private void waitForSpinnerToDisappear(WebDriver driver) {
+	    By spinner = By.xpath("//div[@class='spinner-border' and @role='status']");
+
+	    try {
+	        // Very short wait (0.5s) just to see if spinner exists
+	        WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofMillis(100));
+	        boolean appeared = shortWait.until(d -> !driver.findElements(spinner).isEmpty());
+
+	        if (appeared) {
+	            // If it appeared, wait max 10s for disappearance
+	            new WebDriverWait(driver, Duration.ofSeconds(20)).until(ExpectedConditions.invisibilityOfElementLocated(spinner));
+	        }
+	    } catch (TimeoutException te) {
+	    }
+	}
+
+	
+	
+}
+

@@ -1,0 +1,95 @@
+package com.figs.automation.runners;
+
+import com.figs.automation.flows.LoanDeposit;
+import com.figs.automation.flows.MoneyTransfer;
+import com.figs.automation.flows.SSS;
+import com.figs.automation.flows.AccountOpening;
+import com.figs.automation.flows.CashDeposit;
+import com.figs.automation.flows.EaseServices;
+
+import org.openqa.selenium.WebDriver;
+import org.testng.annotations.Test;
+
+import javax.swing.*;
+
+
+public class FunctionalitySelector {
+
+    private final WebDriver driver;
+
+    public FunctionalitySelector(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void selectAndRun() {
+        String[] options = { "All","Loan Deposit", "Cash Deposit","MoneyTransfer","SSS_PMJJBY","SSS_PMSBY","SSS_APY","ATM Card Block","ChequeBookRequest","Account Opening","Loan Deposit","Exit"};
+        String functionality = (String) JOptionPane.showInputDialog(
+                null,
+                "Select functionality to run:",
+                "Functionality Selector",
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (functionality == null) {
+            functionality = "All";
+        }
+
+        switch (functionality) {
+            case "Loan Deposit":
+                new LoanDeposit(driver).run_LoanToDeposit();
+                break;
+
+            case "Cash Deposit":
+                new CashDeposit(driver).run();
+                break;
+            case "MoneyTransfer":
+                new MoneyTransfer(driver).run();
+                break;
+            case "Account Opening":
+                new AccountOpening(driver).run();
+                break;
+            case "SSS_PMJJBY":
+                new SSS(driver).Run_PMJJBY();
+                break;
+            case "SSS_PMSBY":
+                new SSS(driver).Run_PMSBY();
+                break;
+            case "SSS_APY":
+                new SSS(driver).Run_APY();
+                break;
+            case "ATM Card Block":
+                new EaseServices(driver).run_ATM();
+                break;
+            case "ChequeBookRequest":
+                new EaseServices(driver).run_ChequeBookRequest();
+                break;
+            case "All":
+                runAll();
+                break;
+
+            case "Exit":
+                System.out.println("Exit selected. Skipping functionality.");
+                break;
+
+            default:
+                System.out.println("❌ Functionality not implemented: " + functionality);
+        }
+    }
+
+    private void runAll() {
+        System.out.println("▶ Running all flows sequentially...");
+
+    //    new LoanDeposit(driver).run();
+        new CashDeposit(driver).run();
+        new MoneyTransfer(driver).run();
+        new LoanDeposit(driver).run_LoanToDeposit();
+        new SSS(driver).Run_PMJJBY();
+        new SSS(driver).Run_PMSBY();
+        new SSS(driver).Run_APY();
+        new EaseServices(driver).run_ATM();
+        new EaseServices(driver).run_ChequeBookRequest();
+        System.out.println("✅ All flows executed.");
+    }
+}
